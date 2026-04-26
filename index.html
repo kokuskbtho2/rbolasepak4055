@@ -17,23 +17,47 @@
       <div id="search-results-content" class="grid grid-cols-1 gap-3"></div>
      </div>
     </div><!-- Tab Navigation -->
-    <div class="bg-white rounded-2xl shadow-lg p-2 mb-6 fade-in border border-indigo-100">
-     <div class="flex gap-2 flex-wrap">
-      <button id="tab-student-list" type="button" class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-red-500 text-white shadow-md">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a. 0z" />
-       </svg> Senarai Murid </button> <button id="attendance-tab-btn" onclick="switchTab('attendance')" class="..."> Kehadiran </button>  class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-       </svg> Pengisian Kehadiran </button> <button id="analytics-tab-btn" onclick="switchTab('analytics')" class="..."> Analisa </button> class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-<div id="attendance-tab-content" class=""> </div> <div id="analytics-tab-content" class="hidden"> </div> 
-       </svg> Analisa Kehadiran </button> <a href="https://skbtho2official.my.canva.site/cocotracksktho22026" target="_blank" rel="noopener noreferrer" type="button" class="px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:from-indigo-700 hover:to-purple-700">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-       </svg> Menu Utama </a>
-     </div>
+<div class="bg-white rounded-2xl shadow-lg p-2 mb-6 fade-in border border-indigo-100">
+      <div class="flex gap-2 flex-wrap">
+        <button id="tab-student-list" type="button" onclick="switchTab('students')"
+                class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-red-500 text-white shadow-md">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          Senarai Murid
+        </button>
+
+        <button id="attendance-tab-btn" type="button" onclick="switchTab('attendance')"
+                class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          Pengisian Kehadiran
+        </button>
+
+        <button id="analytics-tab-btn" type="button" onclick="switchTab('analytics')"
+                class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Analisa Kehadiran
+        </button>
+
+        <a href="https://skbtho2official.my.canva.site/cocotracksktho22026" target="_blank" rel="noopener noreferrer" 
+           class="px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:from-indigo-700 hover:to-purple-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          Menu Utama
+        </a>
+      </div>
+    </div>
+
+    <div id="attendance-tab-content" class="hidden">
+        </div>
+    <div id="analytics-tab-content" class="hidden">
+        </div>
+
     </div><!-- Student List View -->
     <div id="view-student-list" class="view-container active">
      <div id="student-list-year-selection" class="student-list-year-selection-view">
@@ -861,7 +885,7 @@ function updateAnalytics() {
         const result = await syncToSheet(‘update, updatedRecord);
         if (result.isOk) {
           unitNameRecord = updatedRecord;
-          showAutoSaveNotification('✓ Nama Unit Disimpan!', `"${unitName}" tersimpan ke Canva Sheet`);
+          showAutoSaveNotification('✓ Nama Unit Disimpan!', `"${unitName}" tersimpan ke Sheet`);
         } else if (result.isError) {
           console.error('Error saving unit name:', result.error);
           showAutoSaveNotification('⚠️ Gagal Menyimpan', 'Sila cuba lagi', 'error');
@@ -874,7 +898,8 @@ function updateAnalytics() {
         };
         const result = await syncToSheet('create', newRecord);
         if (result.isOk) {
-          showAutoSaveNotification('✓ Nama Unit Disimpan!', `"${unitName}" tersimpan ke Canva Sheet`);
+          showAutoSaveNotification('✓ Nama Unit Disimpan!', `"${unitName}" tersimpan ke 
+Sheet`);
         } else if (result.isError) {
           console.error('Error creating unit name:', result.error);
           showAutoSaveNotification('⚠️ Gagal Menyimpan', 'Sila cuba lagi', 'error');
@@ -1387,7 +1412,8 @@ function updateAnalytics() {
       if (syncToSheet) {
         const result = await syncToSheet('update', updatedStudent); 
         if (result.isOk) {
-          showAutoSaveNotification('Kehadiran disimpan!', 'Perubahan telah tersimpan ke Canva Sheet');
+          showAutoSaveNotification('Kehadiran disimpan!', 'Perubahan telah tersimpan ke 
+Sheet');
         }
       }
     }
@@ -2215,6 +2241,46 @@ function updateAnalytics() {
     // Initialize app when DOM is ready
     document.addEventListener('DOMContentLoaded', initializeApp);
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f24d3b697862203',t:'MTc3NzE5ODUzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>function switchTab(tabId) {
+  // 1. Kenal pasti semua content view
+  const views = {
+    students: document.getElementById('view-student-list'),
+    attendance: document.getElementById('attendance-tab-content'),
+    analytics: document.getElementById('analytics-tab-content')
+  };
+
+  // 2. Sembunyikan semua, tunjukkan yang dipilih
+  Object.keys(views).forEach(key => {
+    if (views[key]) {
+      if (key === tabId) {
+        views[key].classList.remove('hidden');
+      } else {
+        views[key].classList.add('hidden');
+      }
+    }
+  });
+
+  // 3. Update warna butang supaya user tahu dia kat tab mana
+  const btns = {
+    students: document.getElementById('tab-student-list'),
+    attendance: document.getElementById('attendance-tab-btn'),
+    analytics: document.getElementById('analytics-tab-btn')
+  };
+
+  Object.keys(btns).forEach(key => {
+    if (btns[key]) {
+      if (key === tabId) {
+        btns[key].className = "flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-red-500 text-white shadow-md";
+      } else {
+        btns[key].className = "flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200";
+      }
+    }
+  });
+
+  // 4. Jalankan render mengikut tab
+  if (tabId === 'attendance') renderStudentRows();
+  if (tabId === 'analytics') updateAnalytics();
+}
+(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f24d3b697862203',t:'MTc3NzE5ODUzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
 
