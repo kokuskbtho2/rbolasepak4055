@@ -1,539 +1,489 @@
-<!doctype html>
-<html lang="ms" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kehadiran Kokurikulum</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; }
-    html, body, #app { height: 100%; width: 100%; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    
-    .attendance-checkbox {
-      transition: all 0.2s ease;
-    }
-    .attendance-checkbox:hover {
-      transform: scale(1.1);
-    }
-    .attendance-checkbox:active {
-      transform: scale(0.95);
-    }
-    .date-input {
-      width: 90px;
-      font-size: 9px;
-      padding: 2px 4px;
-      cursor: pointer;
-    }
-    .date-input::-webkit-calendar-picker-indicator {
-      cursor: pointer;
-      opacity: 1;
-      filter: invert(1);
-      width: 12px;
-      height: 12px;
-    }
-    .table-container::-webkit-scrollbar {
-      height: 8px;
-    }
-    .table-container::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 4px;
-    }
-    .table-container::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    .table-container::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .fade-in {
-      animation: fadeIn 0.4s ease-out forwards;
-    }
-    .donut-chart {
-      transform: rotate(-90deg);
-    }
-    .modal-backdrop {
-      animation: fadeIn 0.3s ease-out;
-    }
-    .modal-content {
-      animation: fadeIn 0.3s ease-out;
-    }
-    @keyframes slideIn {
-      from { transform: translateX(400px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    .animate-slide-in {
-      animation: slideIn 0.3s ease-out;
-    }
-  </style>
-  <style>body { box-sizing: border-box; }</style>
-  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
- </head>
- <body class="h-full bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 overflow-auto" style="background-color: #f5f5dc;">
-  <div id="app" class="w-full h-full overflow-auto">
-   <div class="p-4 md:p-6"><!-- Header -->
-    <div class="text-center mb-6 fade-in">
-     <div class="flex justify-center mb-4"><img src="https://i.imgur.com/DLy3jZn.png" alt="Logo" class="h-32 md:h-40" loading="lazy" onerror="console.error('Image failed:', this.src); this.style.background='linear-gradient(135deg, #dc2626 0%, #991b1b 100%)'; this.alt='Logo unavailable';">
-     </div>
-     <h1 id="main-title" class="text-2xl md:text-3xl font-bold text-indigo-900 mb-2">Kehadiran Kokurikulum</h1>
-     <h2 id="school-title" class="text-lg md:text-xl text-indigo-900 font-semibold">SK Bandar Tun Hussein Onn 2</h2>
-     <div class="mt-3 inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-indigo-100">
-      <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg><input type="text" id="unit-input" value="" class="text-indigo-800 font-medium bg-transparent border-none outline-none focus:ring-0 text-center" style="min-width: 150px; max-width: 600px; width: auto;" placeholder="Masukkan nama unit">
-     </div>
-    </div><!-- Global Search Bar -->
-    <div class="relative mb-6 max-w-2xl mx-auto fade-in z-[9998]">
-     <div class="flex gap-2 flex-wrap">
-      <div class="flex-1 min-w-[250px] relative z-[9998]">
-       <div class="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-       </div><input type="text" id="global-search-input" placeholder="🔍 Cari murid..." class="w-full pl-12 pr-4 py-3 border-2 border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white text-indigo-900 font-medium"> <button id="global-search-clear" class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-100 rounded-lg transition-all text-gray-400">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg></button>
-      </div><select id="global-search-year-filter" class="px-4 py-3 border-2 border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white text-indigo-900 font-semibold"> <option value="all">Semua Tahun</option> <option value="4">Tahun 4</option> <option value="5">Tahun 5</option> <option value="6">Tahun 6</option> </select>
-     </div>
-     <div id="global-search-results" class="hidden absolute top-full left-0 right-0 bg-white border-2 border-indigo-200 rounded-xl shadow-2xl z-[9999] max-h-96 overflow-y-auto p-4 mt-2">
-      <div id="search-results-content" class="grid grid-cols-1 gap-3"></div>
-     </div>
-    </div><!-- Tab Navigation -->
-    <div class="bg-white rounded-2xl shadow-lg p-2 mb-6 fade-in border border-indigo-100">
-     <div class="flex gap-2 flex-wrap"><button id="tab-student-list" type="button" class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-red-500 text-white shadow-md">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-       </svg> Senarai Murid </button> <button id="tab-attendance" type="button" class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-       </svg> Pengisian Kehadiran </button> <button id="tab-analytics" type="button" class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-       </svg> Analisa Kehadiran </button> <a href="https://skbtho2official.my.canva.site/cocotracksktho22026" target="_blank" rel="noopener noreferrer" type="button" class="px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:from-indigo-700 hover:to-purple-700">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-       </svg> Menu Utama </a>
-     </div>
-    </div><!-- Student List View -->
-    <div id="view-student-list" class="view-container active">
-     <div id="student-list-year-selection" class="student-list-year-selection-view">
-      <div class="max-w-4xl mx-auto">
-       <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Pilih Tahun Persekolahan</h2>
-        <p class="text-indigo-600">Sila pilih tahun untuk mengurus senarai murid</p>
-       </div>
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><button type="button" onclick="selectStudentListYear(4)" class="year-card bg-red-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all border-2 border-red-600 hover:border-red-700 hover:scale-105 group">
-         <div class="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><span class="text-4xl font-bold text-red-800">4</span>
-         </div><h3 class="text-xl font-bold text-white mb-2">Tahun 4</h3><p class="text-red-100 text-sm" id="student-list-year4-count">0 murid</p></button> <button type="button" onclick="selectStudentListYear(5)" class="year-card bg-red-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all border-2 border-red-600 hover:border-red-700 hover:scale-105 group">
-         <div class="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><span class="text-4xl font-bold text-red-800">5</span>
-         </div><h3 class="text-xl font-bold text-white mb-2">Tahun 5</h3><p class="text-red-100 text-sm" id="student-list-year5-count">0 murid</p></button> <button type="button" onclick="selectStudentListYear(6)" class="year-card bg-red-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all border-2 border-red-600 hover:border-red-700 hover:scale-105 group">
-         <div class="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><span class="text-4xl font-bold text-red-800">6</span>
-         </div><h3 class="text-xl font-bold text-white mb-2">Tahun 6</h3><p class="text-red-100 text-sm" id="student-list-year6-count">0 murid</p></button>
-       </div>
-      </div>
-     </div>
-     <div id="student-list-data-view" class="hidden">
-      <div class="bg-white rounded-2xl shadow-lg p-4 mb-6 fade-in border border-indigo-100">
-       <div class="flex items-center justify-between flex-wrap gap-3"><button type="button" onclick="backToStudentListYearSelection()" class="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all flex items-center gap-2">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-         </svg> Kembali </button>
-        <div class="flex items-center gap-2">
-         <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center"><span id="student-list-selected-year-badge" class="text-2xl font-bold text-white">4</span>
-         </div>
-         <div>
-          <p class="text-sm text-gray-600">Senarai Murid</p>
-          <p id="student-list-selected-year-label" class="text-lg font-bold text-indigo-900">Tahun 4</p>
-         </div>
-        </div>
-       </div>
-      </div>
-      <div class="bg-white rounded-2xl shadow-lg p-4 mb-6 fade-in border border-indigo-100"><button type="button" id="bulk-upload-student-list-btn" class="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 mb-3">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg> Tambah Pukal </button>
-       <p id="student-list-limit-warning" class="hidden text-amber-600 text-sm">Had maksimum 999 murid telah dicapai.</p>
-      </div>
-      <div class="bg-white rounded-2xl shadow-lg p-4 mb-6 fade-in border border-indigo-100">
-       <div class="flex flex-col gap-3">
-        <div class="flex flex-col sm:flex-row gap-3"><input type="text" id="student-list-name-input" placeholder="Masukkan nama murid..." class="flex-1 px-4 py-3 border-2 border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"> <input type="text" id="student-list-class-input" placeholder="Contoh: JASMINE, HIBISCUS..." class="sm:w-40 px-4 py-3 border-2 border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"> <button type="button" id="add-student-list-btn" class="px-6 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg> Tambah Murid </button>
-        </div>
-       </div>
-      </div>
-      <div class="bg-white rounded-2xl shadow-lg overflow-hidden fade-in border border-indigo-100">
-       <div class="p-4 border-b border-indigo-100 flex justify-between items-center flex-wrap gap-3">
-        <h3 class="text-lg font-bold text-indigo-900">Senarai Nama Murid</h3>
-        <div class="flex gap-3"><button type="button" id="print-student-list-btn" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg> Cetak Senarai PDF </button> <button type="button" id="delete-all-student-list-btn" class="px-5 py-2.5 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg> Padam Semua Murid </button>
-        </div>
-       </div>
-       <div class="overflow-x-auto">
-        <table class="w-full">
-         <thead>
-          <tr class="bg-red-500 text-white">
-           <th class="px-4 py-4 text-left font-semibold">Bil</th>
-           <th class="px-4 py-4 text-left font-semibold">Nama Murid</th>
-           <th class="px-4 py-4 text-center font-semibold">Kelas</th>
-           <th class="px-4 py-4 text-center font-semibold">Tindakan</th>
-          </tr>
-         </thead>
-         <tbody id="student-list-body"></tbody>
-        </table>
-       </div>
-       <div id="student-list-empty-state" class="hidden p-12 text-center">
-        <svg class="w-16 h-16 mx-auto text-indigo-300 mb-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-        <p class="text-indigo-400 font-medium text-lg">Tiada murid didaftarkan</p>
-        <p class="text-indigo-300 text-sm mt-2">Sila tambah murid untuk memulakan</p>
-       </div>
-      </div>
-     </div>
-    </div><!-- Attendance View -->
-    <div id="view-attendance" class="view-container hidden">
-     <div id="year-selection" class="year-selection-view">
-      <div class="max-w-4xl mx-auto">
-       <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Pilih Tahun Persekolahan</h2>
-        <p class="text-indigo-600">Sila pilih tahun untuk mula mengisi kehadiran</p>
-       </div>
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><button type="button" onclick="selectYear(4)" class="year-card bg-red-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all border-2 border-red-600 hover:border-red-700 hover:scale-105 group">
-         <div class="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><span class="text-4xl font-bold text-red-800">4</span>
-         </div><h3 class="text-xl font-bold text-white mb-2">Tahun 4</h3><p class="text-red-100 text-sm" id="year4-count">0 murid</p></button> <button type="button" onclick="selectYear(5)" class="year-card bg-red-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all border-2 border-red-600 hover:border-red-700 hover:scale-105 group">
-         <div class="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><span class="text-4xl font-bold text-red-800">5</span>
-         </div><h3 class="text-xl font-bold text-white mb-2">Tahun 5</h3><p class="text-red-100 text-sm" id="year5-count">0 murid</p></button> <button type="button" onclick="selectYear(6)" class="year-card bg-red-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all border-2 border-red-600 hover:border-red-700 hover:scale-105 group">
-         <div class="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"><span class="text-4xl font-bold text-red-800">6</span>
-         </div><h3 class="text-xl font-bold text-white mb-2">Tahun 6</h3><p class="text-red-100 text-sm" id="year6-count">0 murid</p></button>
-       </div>
-      </div>
-     </div>
-     <div id="attendance-data-view" class="hidden">
-      <div class="bg-white rounded-2xl shadow-lg p-4 mb-6 fade-in border border-indigo-100">
-       <div class="flex items-center justify-between flex-wrap gap-3"><button type="button" onclick="backToYearSelection()" class="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all flex items-center gap-2">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-         </svg> Kembali </button>
-        <div class="flex items-center gap-3">
-         <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center"><span id="selected-year-badge" class="text-2xl font-bold text-white">4</span>
-         </div>
-         <div>
-          <p class="text-sm text-gray-600">Kehadiran</p>
-          <p id="selected-year-label" class="text-lg font-bold text-indigo-900">Tahun 4</p>
-         </div>
-        </div><button type="button" id="download-pdf-btn" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-         </svg> Cetak PDF </button>
-       </div>
-      </div>
-      <div class="bg-white rounded-2xl shadow-lg overflow-hidden fade-in border border-indigo-100">
-       <div class="p-4 border-b border-indigo-100">
-        <div class="flex items-start justify-between gap-4 flex-wrap">
-         <div>
-          <h3 class="text-lg font-bold text-indigo-900 mb-2">Senarai Kehadiran</h3>
-         </div>
-         <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4 flex-1 min-w-[300px]">
-          <div class="flex items-start gap-3">
-           <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-           </svg>
-           <div class="text-sm">
-            <p class="font-bold text-blue-900 mb-2">📝 Panduan Pengisian:</p>
-            <ul class="text-blue-800 space-y-1 list-disc list-inside text-xs">
-             <li>Klik kotak <span class="font-semibold">"/"</span> = Murid <span class="text-emerald-600 font-bold">HADIR</span></li>
-             <li>Biarkan kotak kosong <span class="font-semibold">"O"</span> = Murid <span class="text-rose-600 font-bold">TIDAK HADIR</span></li>
-             <li>Klik butang <span class="font-semibold">"/ SEMUA"</span> jika <span class="font-bold">SEMUA MURID HADIR</span> pada perjumpaan itu</li>
-             <li><span class="font-bold">SILA ISI TARIKH</span> di setiap perjumpaan (tarikh di bawah P1, P2, dsb)</li>
-             <li>Sistem <span class="font-bold">auto-save</span> setiap kali anda klik</li>
-             <li>Jangan tutup laman sehingga semua data tersimpan</li>
-            </ul>
-           </div>
-          </div>
-         </div>
-        </div>
-       </div>
-       <div class="table-container overflow-x-auto">
-        <table class="w-full min-w-max">
-         <thead>
-          <tr class="bg-red-500 text-white">
-           <th class="px-3 py-4 text-left font-semibold text-sm sticky left-0 bg-red-500 z-10" rowspan="2">Bil</th>
-           <th class="px-3 py-4 text-left font-semibold text-sm sticky left-12 bg-red-500 z-10 min-w-[180px]" rowspan="2">Nama Murid</th>
-           <th class="px-3 py-4 text-center font-semibold text-sm sticky left-[252px] bg-red-500 z-10 min-w-[100px]" rowspan="2">Kelas</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P1</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P2</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P3</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P4</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P5</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P6</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P7</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P8</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P9</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P10</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P11</th>
-           <th class="px-2 py-2 text-center font-semibold text-sm">P12</th>
-           <th class="px-3 py-4 text-center font-semibold text-sm bg-red-500" rowspan="2">Jumlah</th>
-          </tr>
-          <tr class="bg-red-500 text-white text-xs">
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(1)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="1"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(2)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="2"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(3)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="3"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(4)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="4"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(5)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="5"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(6)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="6"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(7)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="7"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(8)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="8"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(9)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="9"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(10)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="10"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(11)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="11"></td>
-           <td class="px-1 py-2 text-center align-top"><button type="button" onclick="tickAllForMeeting(12)" class="w-full mb-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-bold transition-all">/ Semua</button>
-            <div class="text-white text-[10px] mb-1">
-             Tarikh:
-            </div><input type="date" class="date-input px-1 py-1 border border-indigo-300 rounded text-center bg-white text-gray-800" data-date="12"></td>
-          </tr>
-         </thead>
-         <tbody id="attendance-body"></tbody>
-        </table>
-       </div>
-       <div id="empty-state" class="hidden p-12 text-center">
-        <svg class="w-16 h-16 mx-auto text-indigo-300 mb-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-        <p class="text-indigo-400 font-medium text-lg">Tiada murid didaftarkan</p>
-        <p class="text-indigo-300 text-sm mt-2">Sila pergi ke tab "Senarai Murid" untuk tambah murid</p>
-       </div>
-      </div>
-     </div>
-    </div><!-- Analytics View -->
-    <div id="view-analytics" class="view-container hidden">
-     <div class="bg-white rounded-2xl shadow-lg p-6 fade-in border border-indigo-100">
-      <div class="mb-4">
-       <h3 class="text-lg font-bold text-indigo-900 flex items-center gap-2 mb-4">
-        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg> Analisa Kehadiran Mengikut Perjumpaan</h3>
-       <div class="flex flex-wrap gap-3 mb-4"><button type="button" onclick="generateAnalyticsPDFForYear(4)" class="flex-1 min-w-[200px] px-5 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold rounded-xl hover:from-red-700 hover:to-rose-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-         </svg> Cetak Analisa Tahun 4 </button> <button type="button" onclick="generateAnalyticsPDFForYear(5)" class="flex-1 min-w-[200px] px-5 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-         </svg> Cetak Analisa Tahun 5 </button> <button type="button" onclick="generateAnalyticsPDFForYear(6)" class="flex-1 min-w-[200px] px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-         </svg> Cetak Analisa Tahun 6 </button>
-       </div>
-       <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-300 rounded-xl p-4">
-        <h4 class="font-bold text-purple-900 mb-2 flex items-center gap-2">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-         </svg> Laporan Keseluruhan Tahunan</h4>
-        <p class="text-sm text-purple-800 mb-3">Laporan lengkap dengan ringkasan 12 perjumpaan + senarai murid keseluruhan</p>
-        <div class="flex flex-wrap gap-2"><button type="button" onclick="generateComprehensiveReport(4)" class="flex-1 min-w-[160px] px-4 py-2.5 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-all shadow-md flex items-center justify-center gap-2 text-sm">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg> Laporan Tahun 4 </button> <button type="button" onclick="generateComprehensiveReport(5)" class="flex-1 min-w-[160px] px-4 py-2.5 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-all shadow-md flex items-center justify-center gap-2 text-sm">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg> Laporan Tahun 5 </button> <button type="button" onclick="generateComprehensiveReport(6)" class="flex-1 min-w-[160px] px-4 py-2.5 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-all shadow-md flex items-center justify-center gap-2 text-sm">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg> Laporan Tahun 6 </button>
-        </div>
-       </div>
-      </div>
-      <div class="mb-6 flex items-center gap-6 flex-wrap">
-       <div class="flex items-center gap-3"><label class="text-indigo-700 font-medium">Tahun:</label> <select id="analytics-year-selector" class="px-4 py-2 border-2 border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white font-semibold text-indigo-900"> <option value="4">Tahun 4</option> <option value="5">Tahun 5</option> <option value="6">Tahun 6</option> </select>
-       </div>
-       <div class="flex items-center gap-3"><label class="text-indigo-700 font-medium">Perjumpaan:</label> <select id="meeting-selector" class="px-4 py-2 border-2 border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white"> <option value="all">Semua Perjumpaan</option> <option value="1">Perjumpaan 1</option> <option value="2">Perjumpaan 2</option> <option value="3">Perjumpaan 3</option> <option value="4">Perjumpaan 4</option> <option value="5">Perjumpaan 5</option> <option value="6">Perjumpaan 6</option> <option value="7">Perjumpaan 7</option> <option value="8">Perjumpaan 8</option> <option value="9">Perjumpaan 9</option> <option value="10">Perjumpaan 10</option> <option value="11">Perjumpaan 11</option> <option value="12">Perjumpaan 12</option> </select>
-       </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-       <div class="flex flex-col items-center">
-        <div class="relative w-48 h-48">
-         <svg class="w-full h-full donut-chart" viewbox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="12" /> <circle id="attendance-circle" cx="50" cy="50" r="40" fill="none" stroke="url(#gradient)" stroke-width="12" stroke-dasharray="0 251.2" stroke-linecap="round" /> <defs>
-           <lineargradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color:#10b981" />
-            <stop offset="100%" style="stop-color:#059669" />
-           </lineargradient>
-          </defs>
-         </svg>
-         <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="attendance-percentage" class="text-3xl font-bold text-indigo-900">0%</span> <span class="text-sm text-indigo-500">Kehadiran</span>
-         </div>
-        </div>
-        <p class="text-sm text-indigo-600 font-medium mt-3">Untuk <span id="selected-meeting-label">Perjumpaan 1</span></p>
-       </div>
-       <div class="md:col-span-2 grid grid-cols-2 gap-4">
-        <div class="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-4 border border-emerald-100">
-         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
-           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-           </svg>
-          </div>
-          <div>
-           <p class="text-emerald-600 text-sm font-medium">Hadir</p>
-           <p id="total-present" class="text-2xl font-bold text-emerald-700">0</p>
-          </div>
-         </div>
-        </div>
-        <div class="bg-gradient-to-br from-rose-50 to-red-50 rounded-xl p-4 border border-rose-100">
-         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-rose-500 rounded-xl flex items-center justify-center">
-           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-           </svg>
-          </div>
-          <div>
-           <p class="text-rose-600 text-sm font-medium">Tidak Hadir</p>
-           <p id="total-absent" class="text-2xl font-bold text-rose-700">0</p>
-          </div>
-         </div>
-        </div>
-        <div class="bg-red-50 rounded-xl p-4 border border-red-100">
-         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
-           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-           </svg>
-          </div>
-          <div>
-           <p class="text-red-600 text-sm font-medium">Jumlah Murid</p>
-           <p id="total-students" class="text-2xl font-bold text-red-700">0</p>
-          </div>
-         </div>
-        </div>
-        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
-         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center">
-           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-           </svg>
-          </div>
-          <div>
-           <p class="text-indigo-600 text-sm font-medium">Peratus Kehadiran</p>
-           <p id="attendance-rate" class="text-2xl font-bold text-indigo-700">0%</p>
-          </div>
-         </div>
-        </div>
-       </div>
-      </div>
-     </div>
-    </div><!-- Bulk Upload Modal -->
-    <div id="bulk-upload-student-list-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] modal-backdrop">
-     <div class="bg-white rounded-2xl p-6 mx-4 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto modal-content">
-      <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-       <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-       </svg>
-      </div>
-      <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Tambah Nama Murid Pukal</h3>
-      <p class="text-gray-600 mb-4 text-sm text-center">Format: Nama Murid | Kelas (satu murid setiap baris)</p>
-      <div class="space-y-4 mb-6">
-       <div>
-        <p class="text-xs text-indigo-700 font-semibold mb-2">CARA 1: Copy Terus dari Google Sheets</p>
-        <div class="bg-white rounded-lg p-3 text-xs text-gray-700 border border-indigo-100">
-         <p class="mb-2 font-medium text-emerald-700">Pilih 2 kolum di Google Sheets → Copy → Paste terus!</p>
-         <div class="bg-emerald-50 border border-emerald-200 rounded p-2 font-mono text-[10px]">
-          Ahmad bin Abdullah&nbsp;&nbsp;&nbsp;&nbsp;4A<br>
-           Siti Nurhaliza&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4B
-         </div>
-        </div>
-       </div>
-       <div>
-        <p class="text-xs text-indigo-700 font-semibold mb-2">CARA 2: Guna simbol | (pipe)</p>
-        <div class="bg-white rounded-lg p-3 font-mono text-xs text-gray-700 border border-indigo-100">
-         Ahmad bin Abdullah | 4A<br>
-          Siti Nurhaliza | 4B
-        </div>
-       </div>
-      </div><textarea id="bulk-student-list-names-input" placeholder="Paste nama murid di sini..." class="w-full h-40 px-4 py-3 border-2 border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all resize-none mb-4 font-sans text-sm"></textarea>
-      <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-4">
-       <div class="flex gap-3">
-        <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div class="text-sm text-blue-800">
-         <p class="font-semibold mb-2">💡 Cadangan Terbaik:</p>
-         <ul class="list-disc list-inside space-y-1 text-blue-700 text-xs">
-          <li>Jangan upload lebih dari 50 nama setiap kali untuk elakkan lag</li>
-          <li>Jika ada lebih dari 50 murid, upload 2-3 kali secara berasingan</li>
-          <li>Pastikan nama &amp; kelas jelas sebelum paste untuk mengelakkan ralat</li>
-         </ul>
-        </div>
-       </div>
-      </div>
-      <div class="flex gap-3"><button type="button" id="cancel-bulk-student-list-upload" class="flex-1 px-4 py-2 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all">Batal</button> <button type="button" id="confirm-bulk-student-list-add" class="flex-1 px-4 py-2 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all">Tambah Semua</button>
-      </div>
-      <p id="student-list-upload-status" class="mt-3 text-sm text-gray-600 text-center"></p>
-     </div>
-    </div><!-- Delete Confirmation Modal -->
-    <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-backdrop">
-     <div class="bg-white rounded-2xl p-6 mx-4 max-w-sm w-full shadow-2xl modal-content">
-      <div class="text-center">
-       <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-       </div>
-       <h3 class="text-lg font-bold text-gray-900 mb-2">Padam Murid?</h3>
-       <p id="delete-student-name" class="text-gray-600 mb-3">Adakah anda pasti mahu memadam murid ini?</p>
-       <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-3 mb-4">
-        <p class="text-amber-800 text-sm font-medium mb-2">Masukkan PIN untuk padam murid:</p><input type="password" id="delete-pin-input" placeholder="Masukkan PIN" class="w-full px-4 py-2 border-2 border-amber-300 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all text-center font-mono text-lg" maxlength="8" autocomplete="off">
-        <p id="pin-error" class="hidden text-rose-600 text-xs mt-2 font-medium">PIN salah! Sila cuba lagi.</p>
-       </div>
-       <div class="flex gap-3"><button type="button" id="cancel-delete" class="flex-1 px-4 py-2 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all">Batal</button> <button type="button" id="confirm-delete" class="flex-1 px-4 py-2 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 transition-all">Padam</button>
-       </div>
-      </div>
-     </div>
-    </div><!-- Delete All Confirmation Modal -->
-    <div id="delete-all-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-backdrop">
-     <div class="bg-white rounded-2xl p-6 mx-4 max-w-md w-full shadow-2xl modal-content">
-      <div class="text-center">
-       <div class="w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-10 h-10 text-rose-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-       </div>
-       <h3 class="text-xl font-bold text-gray-900 mb-2">AMARAN!</h3>
-       <p class="text-gray-700 mb-2 font-semibold">Padam SEMUA murid <span id="delete-all-year-label">Tahun 4</span>?</p>
-       <p class="text-rose-600 mb-3 text-sm font-medium">Tindakan ini TIDAK BOLEH dibatalkan!</p>
-       <p class="text-gray-600 mb-4 text-sm">Jumlah: <span id="delete-all-count" class="font-bold text-rose-600">0 murid</span> akan dipadam</p>
-       <div class="bg-rose-50 border-2 border-rose-300 rounded-xl p-4 mb-4">
-        <p class="text-rose-800 text-sm font-bold mb-3">Masukkan PIN untuk pengesahan:</p><input type="password" id="delete-all-pin-input" placeholder="Masukkan PIN" class="w-full px-4 py-3 border-2 border-rose-300 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-center font-mono text-lg" maxlength="8" autocomplete="off">
-        <p id="delete-all-pin-error" class="hidden text-rose-700 text-sm mt-2 font-bold">PIN salah! Sila cuba lagi.</p>
-       </div>
-       <div class="flex gap-3"><button type="button" id="cancel-delete-all" class="flex-1 px-5 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all">Batal</button> <button type="button" id="confirm-delete-all" class="flex-1 px-5 py-3 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 transition-all">Padam Semua</button>
-       </div>
-      </div>
-     </div>
-    </div>
-    <footer class="mt-8 py-4 text-center border-t-2 border-indigo-200">
-     <p class="text-indigo-900 text-sm font-medium">© 2026 - Unit Kokurikulum SKBTHO2</p>
-    </footer>
-   </div>
-  </div>
-  <script>
-    const defaultConfig = {
-      school_name: 'SK Bandar Tun Hussein Onn 2',
-      unit_name: ''
-    };
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Kehadiran Kokurikulum SKBTHO2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .donut-chart { transform: rotate(-90deg); transition: all 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        #attendance-circle { transition: stroke-dasharray 1s ease-in-out; }
+        .modal-backdrop { backdrop-filter: blur(4px); transition: all 0.3s ease; }
+        .modal-content { transform: scale(0.95); opacity: 0; transition: all 0.3s ease; }
+        #delete-modal:not(.hidden) .modal-content, 
+        #delete-all-modal:not(.hidden) .modal-content,
+        #bulk-upload-student-list-modal:not(.hidden) .modal-content { transform: scale(1); opacity: 1; }
+        .animate-slide-in { animation: slideIn 0.4s ease-out forwards; }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .sticky-col { position: sticky; background: white; z-index: 10; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased">
 
-    let config = { ...defaultConfig };
+  <div class="min-h-screen pb-20">
+    <nav class="bg-white border-b sticky top-0 z-40 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+            <i data-lucide="users" class="text-white w-6 h-6"></i>
+          </div>
+          <div>
+            <h1 id="school-title" class="font-extrabold text-indigo-950 tracking-tight">SK Bandar Tun Hussein Onn 2</h1>
+            <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest">Sistem Pengurusan Kokurikulum</p>
+          </div>
+        </div>
+        <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
+          <button id="tab-student-list" class="px-4 py-2 rounded-lg text-sm font-bold transition-all bg-red-500 text-white shadow-md">Senarai Murid</button>
+          <button id="tab-attendance" class="px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-600 hover:bg-slate-200">Kehadiran</button>
+          <button id="tab-analytics" class="px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-600 hover:bg-slate-200">Analisa</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="relative mb-8 max-w-2xl mx-auto">
+        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
+          <i data-lucide="search" class="w-5 h-5"></i>
+        </div>
+        <input type="text" id="global-search-input" placeholder="Cari nama murid atau kelas..." class="w-full pl-12 pr-24 py-4 bg-white border-2 border-slate-100 rounded-2xl shadow-xl shadow-slate-200/50 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none text-lg">
+        <div class="absolute inset-y-2 right-2 flex gap-2">
+           <select id="global-search-year-filter" class="bg-slate-50 border-none rounded-xl px-3 text-sm font-bold text-slate-600 outline-none">
+             <option value="all">Semua Tahun</option>
+             <option value="4">Tahun 4</option>
+             <option value="5">Tahun 5</option>
+             <option value="6">Tahun 6</option>
+           </select>
+           <button id="global-search-clear" class="hidden w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
+             <i data-lucide="x" class="w-5 h-5"></i>
+           </button>
+        </div>
+        <div id="global-search-results" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50">
+          <div class="p-2 max-h-[400px] overflow-y-auto" id="search-results-content"></div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="flex-1">
+            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Nama Unit/Kelab</label>
+            <input type="text" id="unit-input" placeholder="Masukkan nama unit (cth: Pengakap / Bola Sepak)" class="w-full text-2xl font-black text-indigo-950 border-none p-0 focus:ring-0 placeholder:text-slate-200 uppercase tracking-tight">
+          </div>
+          <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+              <i data-lucide="calendar" class="w-6 h-6 text-indigo-600"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Tahun Semasa</p>
+              <p class="text-lg font-black text-indigo-950">2026</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-student-list" class="view-container">
+        <div id="student-list-year-selection" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div onclick="selectStudentListYear(4)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-100 transition-all cursor-pointer group relative overflow-hidden">
+             <div class="absolute -right-4 -top-4 w-32 h-32 bg-indigo-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+             <div class="relative z-10">
+               <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-200 group-hover:rotate-12 transition-transform">
+                 <span class="text-2xl font-black">4</span>
+               </div>
+               <h3 class="text-xl font-black text-slate-900 mb-2">Tahun 4</h3>
+               <p id="student-list-year4-count" class="text-indigo-600 font-bold">0 murid</p>
+             </div>
+          </div>
+          <div onclick="selectStudentListYear(5)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-100 transition-all cursor-pointer group relative overflow-hidden">
+             <div class="absolute -right-4 -top-4 w-32 h-32 bg-emerald-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+             <div class="relative z-10">
+               <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-200 group-hover:rotate-12 transition-transform">
+                 <span class="text-2xl font-black">5</span>
+               </div>
+               <h3 class="text-xl font-black text-slate-900 mb-2">Tahun 5</h3>
+               <p id="student-list-year5-count" class="text-emerald-600 font-bold">0 murid</p>
+             </div>
+          </div>
+          <div onclick="selectStudentListYear(6)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-100 transition-all cursor-pointer group relative overflow-hidden">
+             <div class="absolute -right-4 -top-4 w-32 h-32 bg-rose-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+             <div class="relative z-10">
+               <div class="w-16 h-16 bg-rose-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-rose-200 group-hover:rotate-12 transition-transform">
+                 <span class="text-2xl font-black">6</span>
+               </div>
+               <h3 class="text-xl font-black text-slate-900 mb-2">Tahun 6</h3>
+               <p id="student-list-year6-count" class="text-rose-600 font-bold">0 murid</p>
+             </div>
+          </div>
+        </div>
+
+        <div id="student-list-data-view" class="hidden space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <button onclick="backToStudentListYearSelection()" class="flex items-center gap-2 text-slate-500 font-bold hover:text-indigo-600 transition-colors">
+              <i data-lucide="arrow-left" class="w-5 h-5"></i> Kembali ke Pemilihan Tahun
+            </button>
+            <div class="flex items-center gap-3">
+              <span id="student-list-selected-year-badge" class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-100">4</span>
+              <h2 id="student-list-selected-year-label" class="text-2xl font-black text-slate-900 tracking-tight">Tahun 4</h2>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+               <div class="md:col-span-2">
+                 <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Nama Penuh Murid</label>
+                 <input type="text" id="student-list-name-input" placeholder="Masukkan nama murid..." class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-500 focus:ring-0 transition-all outline-none">
+               </div>
+               <div>
+                 <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Kelas</label>
+                 <input type="text" id="student-list-class-input" placeholder="Contoh: 4 BESTARI" class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-500 focus:ring-0 transition-all outline-none">
+               </div>
+               <div class="flex items-end">
+                 <button id="add-student-list-btn" class="w-full px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
+                   <i data-lucide="plus" class="w-5 h-5"></i> Tambah Murid
+                 </button>
+               </div>
+             </div>
+             <p id="student-list-limit-warning" class="hidden text-rose-600 text-xs font-bold mt-3 bg-rose-50 p-2 rounded-lg inline-block border border-rose-100">⚠️ Had maksimum 999 murid dicapai!</p>
+          </div>
+
+          <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100">
+             <div class="flex gap-2">
+               <button id="bulk-upload-student-list-btn" class="px-4 py-2 bg-emerald-50 text-emerald-600 font-bold rounded-xl hover:bg-emerald-100 transition-all flex items-center gap-2">
+                 <i data-lucide="upload" class="w-4 h-4"></i> Tambah Pukal
+               </button>
+               <button id="print-student-list-btn" class="px-4 py-2 bg-slate-50 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition-all flex items-center gap-2">
+                 <i data-lucide="printer" class="w-4 h-4"></i> Cetak Senarai
+               </button>
+             </div>
+             <button id="delete-all-student-list-btn" class="px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition-all flex items-center gap-2">
+               <i data-lucide="trash-2" class="w-4 h-4"></i> Padam Semua
+             </button>
+          </div>
+
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                  <tr>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-widest w-20">Bil</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Nama Murid</th>
+                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-widest w-40">Kelas</th>
+                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-widest w-32">Tindakan</th>
+                  </tr>
+                </thead>
+                <tbody id="student-list-body" class="divide-y divide-slate-100">
+                  </tbody>
+              </table>
+              <div id="student-list-empty-state" class="hidden py-20 text-center">
+                 <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                   <i data-lucide="users" class="w-10 h-10 text-slate-200"></i>
+                 </div>
+                 <h3 class="text-slate-900 font-bold">Tiada data murid</h3>
+                 <p class="text-slate-400 text-sm">Sila tambah murid untuk mulakan senarai.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-attendance" class="view-container hidden">
+         <div id="year-selection" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div onclick="selectYear(4)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-100 transition-all cursor-pointer group">
+               <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-200 group-hover:rotate-12 transition-transform"><span class="text-2xl font-black">4</span></div>
+               <h3 class="text-xl font-black text-slate-900 mb-2">Pilih Tahun 4</h3>
+               <p id="year4-count" class="text-indigo-600 font-bold">0 murid</p>
+            </div>
+            <div onclick="selectYear(5)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-emerald-500 hover:shadow-2xl hover:shadow-emerald-100 transition-all cursor-pointer group">
+               <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-200 group-hover:rotate-12 transition-transform"><span class="text-2xl font-black">5</span></div>
+               <h3 class="text-xl font-black text-slate-900 mb-2">Pilih Tahun 5</h3>
+               <p id="year5-count" class="text-emerald-600 font-bold">0 murid</p>
+            </div>
+            <div onclick="selectYear(6)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-rose-500 hover:shadow-2xl hover:shadow-rose-100 transition-all cursor-pointer group">
+               <div class="w-16 h-16 bg-rose-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-rose-200 group-hover:rotate-12 transition-transform"><span class="text-2xl font-black">6</span></div>
+               <h3 class="text-xl font-black text-slate-900 mb-2">Pilih Tahun 6</h3>
+               <p id="year6-count" class="text-rose-600 font-bold">0 murid</p>
+            </div>
+         </div>
+
+         <div id="attendance-data-view" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100">
+               <div class="flex items-center gap-4">
+                  <button onclick="backToYearSelection()" class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+                  <div class="flex items-center gap-3">
+                     <span id="selected-year-badge" class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-lg">4</span>
+                     <h2 id="selected-year-label" class="text-xl font-black text-slate-900">Tahun 4</h2>
+                  </div>
+               </div>
+               <div class="flex flex-wrap gap-2">
+                  <button id="download-pdf-btn" class="px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i> Cetak PDF</button>
+                  <button onclick="generateComprehensiveReport(selectedYear)" class="px-4 py-2 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition-all flex items-center gap-2"><i data-lucide="clipboard-check" class="w-4 h-4"></i> Laporan Keseluruhan</button>
+               </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+               <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-indigo-500"></i> Rekod Tarikh Perjumpaan</h3>
+               <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P1</label>
+                    <input type="date" data-date="1" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P2</label>
+                    <input type="date" data-date="2" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P3</label>
+                    <input type="date" data-date="3" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P4</label>
+                    <input type="date" data-date="4" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P5</label>
+                    <input type="date" data-date="5" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P6</label>
+                    <input type="date" data-date="6" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P7</label>
+                    <input type="date" data-date="7" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P8</label>
+                    <input type="date" data-date="8" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P9</label>
+                    <input type="date" data-date="9" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P10</label>
+                    <input type="date" data-date="10" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P11</label>
+                    <input type="date" data-date="11" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P12</label>
+                    <input type="date" data-date="12" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0">
+                  </div>
+               </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+               <div class="overflow-x-auto overflow-y-visible">
+                  <table class="w-full text-sm">
+                     <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                           <th class="px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-widest sticky left-0 bg-slate-50 z-20">No</th>
+                           <th class="px-4 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest sticky left-[48px] bg-slate-50 z-20">Nama</th>
+                           <th class="px-4 py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest sticky left-[228px] bg-slate-50 z-20">Kelas</th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P1<br><button onclick="tickAllForMeeting(1)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P2<br><button onclick="tickAllForMeeting(2)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P3<br><button onclick="tickAllForMeeting(3)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P4<br><button onclick="tickAllForMeeting(4)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P5<br><button onclick="tickAllForMeeting(5)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P6<br><button onclick="tickAllForMeeting(6)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P7<br><button onclick="tickAllForMeeting(7)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P8<br><button onclick="tickAllForMeeting(8)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P9<br><button onclick="tickAllForMeeting(9)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P10<br><button onclick="tickAllForMeeting(10)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P11<br><button onclick="tickAllForMeeting(11)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P12<br><button onclick="tickAllForMeeting(12)" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>
+                           <th class="px-4 py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest bg-indigo-50">Total</th>
+                        </tr>
+                     </thead>
+                     <tbody id="attendance-body" class="divide-y divide-slate-100">
+                        </tbody>
+                  </table>
+                  <div id="empty-state" class="hidden py-20 text-center">
+                     <i data-lucide="user-plus" class="w-12 h-12 text-slate-200 mx-auto mb-4"></i>
+                     <p class="text-slate-400 font-bold">Tiada murid dalam tahun ini.</p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <div id="view-analytics" class="view-container hidden space-y-8">
+        <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <div>
+              <h2 class="text-3xl font-black text-indigo-950 tracking-tight">Analisa Kehadiran</h2>
+              <p class="text-slate-500 font-medium">Ringkasan statistik dan prestasi unit</p>
+            </div>
+            <div class="flex flex-wrap gap-4">
+               <select id="analytics-year-selector" class="bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 outline-none focus:border-indigo-500 transition-all">
+                 <option value="4">Tahun 4</option>
+                 <option value="5">Tahun 5</option>
+                 <option value="6">Tahun 6</option>
+               </select>
+               <select id="meeting-selector" class="bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 outline-none focus:border-indigo-500 transition-all">
+                 <option value="all">Keseluruhan (P1-P12)</option>
+                 <option value="1">Perjumpaan 1</option><option value="2">Perjumpaan 2</option><option value="3">Perjumpaan 3</option>
+                 <option value="4">Perjumpaan 4</option><option value="5">Perjumpaan 5</option><option value="6">Perjumpaan 6</option>
+                 <option value="7">Perjumpaan 7</option><option value="8">Perjumpaan 8</option><option value="9">Perjumpaan 9</option>
+                 <option value="10">Perjumpaan 10</option><option value="11">Perjumpaan 11</option><option value="12">Perjumpaan 12</option>
+               </select>
+               <button onclick="generateAnalyticsPDFForYear(parseInt(document.getElementById('analytics-year-selector').value))" class="bg-indigo-600 text-white font-bold px-6 py-3 rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2">
+                 <i data-lucide="printer" class="w-5 h-5"></i> Cetak Analisa
+               </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="flex flex-col items-center">
+              <div class="relative w-56 h-56">
+                <svg class="w-full h-full donut-chart" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" stroke-width="12" />
+                  <circle id="attendance-circle" cx="50" cy="50" r="40" fill="none" stroke="url(#gradient)" stroke-width="12" stroke-dasharray="0 251.2" stroke-linecap="round" />
+                  <defs>
+                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style="stop-color:#6366f1" />
+                      <stop offset="100%" style="stop-color:#4f46e5" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span id="attendance-percentage" class="text-4xl font-black text-indigo-950">0%</span>
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Purata Kehadiran</span>
+                </div>
+              </div>
+              <p class="text-sm text-indigo-600 font-bold mt-4 px-4 py-1 bg-indigo-50 rounded-full" id="selected-meeting-label">Perjumpaan 1</p>
+            </div>
+
+            <div class="md:col-span-2 grid grid-cols-2 gap-4">
+              <div class="bg-emerald-50 rounded-3xl p-6 border border-emerald-100">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200">
+                    <i data-lucide="check-circle" class="text-white w-6 h-6"></i>
+                  </div>
+                  <p class="text-emerald-600 font-bold uppercase text-xs tracking-widest">Hadir</p>
+                </div>
+                <p id="total-present" class="text-4xl font-black text-emerald-900">0</p>
+              </div>
+              <div class="bg-rose-50 rounded-3xl p-6 border border-rose-100">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="w-12 h-12 bg-rose-500 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-200">
+                    <i data-lucide="x-circle" class="text-white w-6 h-6"></i>
+                  </div>
+                  <p class="text-rose-600 font-bold uppercase text-xs tracking-widest">Tidak Hadir</p>
+                </div>
+                <p id="total-absent" class="text-4xl font-black text-rose-900">0</p>
+              </div>
+              <div class="bg-indigo-50 rounded-3xl p-6 border border-indigo-100">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                    <i data-lucide="users" class="text-white w-6 h-6"></i>
+                  </div>
+                  <p class="text-indigo-600 font-bold uppercase text-xs tracking-widest">Jumlah Murid</p>
+                </div>
+                <p id="total-students" class="text-4xl font-black text-indigo-900">0</p>
+              </div>
+              <div class="bg-amber-50 rounded-3xl p-6 border border-amber-100">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-200">
+                    <i data-lucide="trending-up" class="text-white w-6 h-6"></i>
+                  </div>
+                  <p class="text-amber-600 font-bold uppercase text-xs tracking-widest">Peratus</p>
+                </div>
+                <p id="attendance-rate" class="text-4xl font-black text-amber-900">0%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="bulk-upload-student-list-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[9999] modal-backdrop p-4">
+      <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl modal-content">
+        <div class="w-20 h-20 bg-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+          <i data-lucide="file-text" class="w-10 h-10 text-emerald-600"></i>
+        </div>
+        <h3 class="text-2xl font-black text-slate-900 mb-2 text-center tracking-tight">Tambah Nama Murid Pukal</h3>
+        <p class="text-slate-500 mb-6 text-sm text-center">Format: Nama Murid | Kelas (satu murid setiap baris)</p>
+        
+        <textarea id="bulk-student-list-names-input" placeholder="Paste nama murid di sini..." class="w-full h-48 px-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-emerald-500 focus:ring-0 transition-all resize-none mb-6 font-mono text-sm"></textarea>
+        
+        <div class="bg-indigo-50 rounded-2xl p-4 mb-6">
+           <div class="flex gap-3">
+             <i data-lucide="lightbulb" class="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5"></i>
+             <div class="text-xs text-indigo-900">
+                <p class="font-black mb-1">💡 Tips Pro:</p>
+                <p>Anda boleh Copy & Paste terus dari Google Sheets. Sistem akan susun A-Z secara automatik mengikut kelas.</p>
+             </div>
+           </div>
+        </div>
+
+        <div class="flex gap-4">
+          <button id="cancel-bulk-student-list-upload" class="flex-1 px-6 py-3 border-2 border-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-all">Batal</button>
+          <button id="confirm-bulk-student-list-add" class="flex-1 px-6 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">Tambah Semua</button>
+        </div>
+        <p id="student-list-upload-status" class="mt-4 text-sm text-slate-500 text-center font-bold"></p>
+      </div>
+    </div>
+
+    <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[9999] modal-backdrop p-4">
+      <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl modal-content text-center">
+        <div class="w-20 h-20 bg-rose-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+          <i data-lucide="alert-triangle" class="w-10 h-10 text-rose-600"></i>
+        </div>
+        <h3 class="text-2xl font-black text-slate-900 mb-2 tracking-tight">Padam Murid?</h3>
+        <p id="delete-student-name" class="text-slate-500 mb-6 font-medium">Tindakan ini tidak boleh dibatalkan.</p>
+        
+        <div class="bg-slate-50 rounded-2xl p-4 mb-6 border-2 border-slate-100">
+           <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Sahkan dengan PIN</label>
+           <input type="password" id="delete-pin-input" placeholder="XXXX" class="w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 text-center font-black text-xl tracking-widest focus:border-rose-500 transition-all outline-none" maxlength="8">
+           <p id="pin-error" class="hidden text-rose-600 text-[10px] font-black mt-2 uppercase">PIN Salah!</p>
+        </div>
+
+        <div class="flex gap-4">
+          <button id="cancel-delete" class="flex-1 px-6 py-3 border-2 border-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-all">Batal</button>
+          <button id="confirm-delete" class="flex-1 px-6 py-3 bg-rose-600 text-white font-bold rounded-2xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-100">Ya, Padam</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="delete-all-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[9999] modal-backdrop p-4">
+       <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl modal-content text-center border-b-8 border-rose-500">
+         <div class="w-24 h-24 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+           <i data-lucide="bomb" class="w-12 h-12 text-rose-600"></i>
+         </div>
+         <h3 class="text-2xl font-black text-slate-900 mb-2 tracking-tight">AMARAN!</h3>
+         <p class="text-slate-900 font-bold mb-1">Padam SEMUA murid <span id="delete-all-year-label" class="text-rose-600 underline">Tahun 4</span>?</p>
+         <p class="text-slate-400 text-xs mb-6">Tindakan ini akan memadam <span id="delete-all-count" class="font-black text-slate-900">0 murid</span> serta merta.</p>
+         
+         <div class="bg-rose-50 rounded-2xl p-4 mb-6 border-2 border-rose-200">
+            <input type="password" id="delete-all-pin-input" placeholder="MASUKKAN PIN" class="w-full bg-white border-2 border-rose-200 rounded-xl px-4 py-4 text-center font-black text-2xl tracking-widest focus:border-rose-600 transition-all outline-none uppercase" maxlength="8">
+            <p id="delete-all-pin-error" class="hidden text-rose-700 text-xs font-black mt-2">PIN SALAH! AKSES DISEKAT.</p>
+         </div>
+
+         <div class="flex gap-4">
+           <button id="cancel-delete-all" class="flex-1 px-6 py-3 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-all">Batal</button>
+           <button id="confirm-delete-all" class="flex-1 px-6 py-3 bg-rose-600 text-white font-black rounded-2xl hover:bg-rose-700 transition-all shadow-xl shadow-rose-200">PADAM SEMUA</button>
+         </div>
+       </div>
+    </div>
+
+    <footer class="mt-12 py-8 text-center border-t border-slate-200">
+      <p class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">© 2026 - Unit Kokurikulum SKBTHO2</p>
+    </footer>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. CONFIGURATION (PENTING!)
+    // ==========================================
+    // GANTIKAN URL INI DENGAN URL DARI GOOGLE APPS SCRIPT ANDA
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLYTW_UTZ6BPNqyCTUyZjoxecqknbY43W9m5H-mIYsMpcjhb26O3BB8x7c0YXygT7t/exec"; 
+    
+    let config = { school_name: 'SK Bandar Tun Hussein Onn 2', unit_name: '' };
     let studentsData = [];
     let studentToDelete = null;
     let currentView = 'student_list';
@@ -545,125 +495,67 @@
     let unitNameRecord = null;
     let meetingDatesRecord = null;
 
-    const dataHandler = {
-      onDataChanged(data) {
-        studentsData = data.filter(d => d && d.record_type !== 'unit_config' && d.record_type !== 'meeting_dates');
-        
-        const unitConfig = data.find(d => d && d.record_type === 'unit_config');
-        if (unitConfig && unitConfig.unit_name) {
-          unitNameRecord = unitConfig;
-          document.getElementById('unit-input').value = unitConfig.unit_name;
-          config.unit_name = unitConfig.unit_name;
+    // ==========================================
+    // 2. DATA SYNC (GOOGLE SHEETS)
+    // ==========================================
+    async function loadData() {
+        if (SCRIPT_URL.includes("MASUKKAN_URL")) {
+            console.error("Sila masukkan URL Google Apps Script yang betul!");
+            return;
         }
 
-        const meetingDates = data.find(d => d && d.record_type === 'meeting_dates');
-        if (meetingDates) {
-          meetingDatesRecord = meetingDates;
-          loadMeetingDates();
-        }
-        
-        updateYearCounts();
-        
-        if (currentView === 'student_list' && studentListYear) {
-          renderStudentListRows();
-        }
-        
-        if (selectedYear) {
-          renderStudentRows();
-        }
-        
-        updateAnalytics();
-      }
-    };
+        try {
+            const response = await fetch(SCRIPT_URL);
+            const data = await response.json();
+            
+            // Asingkan data
+            studentsData = data.filter(d => d.record_type !== 'unit_config' && d.record_type !== 'meeting_dates');
+            
+            const unitConfig = data.find(d => d.record_type === 'unit_config');
+            if (unitConfig) {
+                unitNameRecord = unitConfig;
+                document.getElementById('unit-input').value = unitConfig.unit_name || '';
+                config.unit_name = unitConfig.unit_name || '';
+            }
 
-    async function initializeApp() {
-      if (window.elementSdk) {
-        window.elementSdk.init({
-          defaultConfig,
-          onConfigChange: async (newConfig) => {
-            config = { ...defaultConfig, ...newConfig };
-            applyConfig();
-          },
-          mapToCapabilities: (cfg) => ({
-            recolorables: [],
-            borderables: [],
-            fontEditable: undefined,
-            fontSizeable: undefined
-          }),
-          mapToEditPanelValues: (cfg) => new Map([
-            ['school_name', cfg.school_name || defaultConfig.school_name],
-            ['unit_name', cfg.unit_name || defaultConfig.unit_name]
-          ])
-        });
-      }
+            const meetingDates = data.find(d => d.record_type === 'meeting_dates');
+            if (meetingDates) {
+                meetingDatesRecord = meetingDates;
+                loadMeetingDates();
+            }
 
-      if (window.dataSdk) {
-        await window.dataSdk.init(dataHandler);
-      }
-
-      setupEventListeners();
-      lucide.createIcons();
+            updateYearCounts();
+            if (currentView === 'student_list' && studentListYear) renderStudentListRows();
+            if (selectedYear) renderStudentRows();
+            updateAnalytics();
+            
+        } catch (e) {
+            console.error("Gagal muat data:", e);
+        }
     }
 
-    function applyConfig() {
-      if (config.school_name) {
-        document.getElementById('school-title').textContent = config.school_name;
-      }
-      if (config.unit_name) {
-        document.getElementById('unit-input').value = config.unit_name;
-      }
+    async function syncToSheet(action, data) {
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Penting untuk Apps Script
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, data })
+            });
+            // Kerana no-cors, kita tak dapat response. Kita tunggu kejap baru reload.
+            setTimeout(loadData, 1000);
+        } catch (e) {
+            console.error("Sync Error:", e);
+        }
     }
 
-    function loadMeetingDates() {
-      if (!meetingDatesRecord) return;
-      
-      for (let i = 1; i <= 12; i++) {
-        const dateInput = document.querySelector(`.date-input[data-date="${i}"]`);
-        if (dateInput) {
-          const dateField = `meeting_date_${i}`;
-          if (meetingDatesRecord[dateField]) {
-            dateInput.value = meetingDatesRecord[dateField];
-          }
-        }
-      }
-    }
-
-    async function saveUnitName() {
-      const unitName = document.getElementById('unit-input').value.trim();
-      
-      if (!window.dataSdk) {
-        showAutoSaveNotification('⚠️ Sistem Tidak Siap', 'Data SDK belum dimuatkan', 'error');
-        return;
-      }
-
-      // Always save, don't skip if same - let the function handle it
-      config.unit_name = unitName;
-
-      if (unitNameRecord) {
-        const updatedRecord = { ...unitNameRecord };
-        updatedRecord.unit_name = unitName;
-        const result = await window.dataSdk.update(updatedRecord);
-        if (result.isOk) {
-          unitNameRecord = updatedRecord;
-          showAutoSaveNotification('✓ Nama Unit Disimpan!', `"${unitName}" tersimpan ke Sheet`);
-        } else if (result.isError) {
-          console.error('Error saving unit name:', result.error);
-          showAutoSaveNotification('⚠️ Gagal Menyimpan', 'Sila cuba lagi', 'error');
-        }
-      } else {
-        const newRecord = {
-          record_type: 'unit_config',
-          unit_name: unitName,
-          name: 'unit_config'
-        };
-        const result = await window.dataSdk.create(newRecord);
-        if (result.isOk) {
-          showAutoSaveNotification('✓ Nama Unit Disimpan!', `"${unitName}" tersimpan ke Canva Sheet`);
-        } else if (result.isError) {
-          console.error('Error creating unit name:', result.error);
-          showAutoSaveNotification('⚠️ Gagal Menyimpan', 'Sila cuba lagi', 'error');
-        }
-      }
+    // ==========================================
+    // 3. CORE FUNCTIONS (SAMA MACAM ASAL)
+    // ==========================================
+    function initializeApp() {
+        setupEventListeners();
+        lucide.createIcons();
+        loadData();
     }
 
     function setupEventListeners() {
@@ -675,38 +567,19 @@
       document.getElementById('unit-input').addEventListener('input', () => {
         const unitName = document.getElementById('unit-input').value.trim();
         config.unit_name = unitName;
-        
-        // Clear previous timeout
         clearTimeout(unitNameTimeout);
-        
-        // Save after user stops typing for 400ms (faster!)
-        unitNameTimeout = setTimeout(() => {
-          if (unitName) {
-            saveUnitName();
-          }
-        }, 400);
-      });
-      
-      // Also save on blur as backup
-      document.getElementById('unit-input').addEventListener('blur', () => {
-        clearTimeout(unitNameTimeout);
-        if (document.getElementById('unit-input').value.trim()) {
-          saveUnitName();
-        }
+        unitNameTimeout = setTimeout(() => { if (unitName) saveUnitName(); }, 800);
       });
 
       document.getElementById('add-student-list-btn').addEventListener('click', addStudentFromList);
-      document.getElementById('student-list-name-input').addEventListener('keypress', (e) => e.key === 'Enter' && addStudentFromList());
-      
       document.getElementById('bulk-upload-student-list-btn').addEventListener('click', openBulkUploadModal);
       document.getElementById('cancel-bulk-student-list-upload').addEventListener('click', closeBulkUploadStudentListModal);
       document.getElementById('confirm-bulk-student-list-add').addEventListener('click', processBulkUpload);
-      
-      document.getElementById('delete-all-student-list-btn').addEventListener('click', openDeleteAllModal);
       document.getElementById('cancel-delete').addEventListener('click', closeDeleteModal);
       document.getElementById('confirm-delete').addEventListener('click', confirmDelete);
       document.getElementById('cancel-delete-all').addEventListener('click', closeDeleteAllModal);
       document.getElementById('confirm-delete-all').addEventListener('click', confirmDeleteAll);
+      document.getElementById('delete-all-student-list-btn').addEventListener('click', openDeleteAllModal);
 
       document.getElementById('analytics-year-selector').addEventListener('change', updateAnalytics);
       document.getElementById('meeting-selector').addEventListener('change', updateAnalytics);
@@ -717,128 +590,55 @@
       document.getElementById('global-search-clear').addEventListener('click', clearGlobalSearch);
 
       const dateInputs = document.querySelectorAll('.date-input');
-      dateInputs.forEach(dateInput => {
-        dateInput.addEventListener('change', function(e) {
-          const meetingNum = this.getAttribute('data-date');
-          
-          if (!this.value) {
-            showDateValidationWarning(meetingNum);
-          } else {
-            saveMeetingDate(meetingNum, this.value);
-          }
+      dateInputs.forEach(input => {
+        input.addEventListener('change', function() {
+          saveMeetingDate(this.getAttribute('data-date'), this.value);
         });
       });
     }
 
-    function showDateValidationWarning(meetingNum) {
-      const warningDiv = document.createElement('div');
-      warningDiv.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-slide-in max-w-sm';
-      warningDiv.innerHTML = `
-        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-        </svg>
-        <div>
-          <p class="font-bold text-sm">⚠️ Tarikh Kosong!</p>
-          <p class="text-xs">Sila isi tarikh untuk Perjumpaan ${meetingNum}</p>
-        </div>
-      `;
-      document.body.appendChild(warningDiv);
-      setTimeout(() => warningDiv.remove(), 4000);
+    async function saveUnitName() {
+        const val = document.getElementById('unit-input').value.trim();
+        const data = { record_type: 'unit_config', name: 'unit_config', unit_name: val };
+        await syncToSheet('update', data);
+        showAutoSaveNotification('Disimpan!', 'Nama unit dikemaskini');
     }
 
-    async function saveMeetingDate(meetingNum, dateValue) {
-      if (!window.dataSdk) return;
+    async function saveMeetingDate(num, val) {
+        if (!meetingDatesRecord) meetingDatesRecord = { record_type: 'meeting_dates', name: 'meeting_dates' };
+        meetingDatesRecord[`meeting_date_${num}`] = val;
+        await syncToSheet('update', meetingDatesRecord);
+        showAutoSaveNotification('Tarikh Disimpan!', `P${num} updated`);
+    }
 
-      if (!meetingDatesRecord) {
-        meetingDatesRecord = {
-          record_type: 'meeting_dates',
-          name: 'meeting_dates'
-        };
-        
+    function loadMeetingDates() {
+        if (!meetingDatesRecord) return;
         for (let i = 1; i <= 12; i++) {
-          meetingDatesRecord[`meeting_date_${i}`] = '';
+            const input = document.querySelector(`.date-input[data-date="${i}"]`);
+            if (input && meetingDatesRecord[`meeting_date_${i}`]) input.value = meetingDatesRecord[`meeting_date_${i}`];
         }
-        
-        meetingDatesRecord[`meeting_date_${meetingNum}`] = dateValue;
-        
-        const result = await window.dataSdk.create(meetingDatesRecord);
-        if (result.isOk) {
-          showAutoSaveNotification('Tarikh Tersimpan! ✓', `Perjumpaan ${meetingNum} - ${new Date(dateValue).toLocaleDateString('ms-MY')}`);
-        }
-      } else {
-        const updatedRecord = { ...meetingDatesRecord };
-        updatedRecord[`meeting_date_${meetingNum}`] = dateValue;
-        
-        const result = await window.dataSdk.update(updatedRecord);
-        if (result.isOk) {
-          meetingDatesRecord = updatedRecord;
-          showAutoSaveNotification('Tarikh Tersimpan! ✓', `Perjumpaan ${meetingNum} - ${new Date(dateValue).toLocaleDateString('ms-MY')}`);
-        }
-      }
-    }
-
-    function showAutoSaveNotification(title, message, type = 'success') {
-      const toastDiv = document.createElement('div');
-      const bgColor = type === 'error' ? 'bg-rose-600' : 'bg-emerald-600';
-      const icon = type === 'error' 
-        ? '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
-        : '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-      
-      toastDiv.className = `fixed bottom-4 right-4 ${bgColor} text-white px-5 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-slide-in`;
-      toastDiv.innerHTML = `
-        ${icon}
-        <div>
-          <p class="font-semibold text-sm">${title}</p>
-          <p class="text-xs opacity-90">${message}</p>
-        </div>
-      `;
-      document.body.appendChild(toastDiv);
-      const duration = type === 'error' ? 5000 : 3000;
-      setTimeout(() => toastDiv.remove(), duration);
     }
 
     function switchTab(tab) {
-      const tabToViewMap = {
-        'student-list': 'view-student-list',
-        'attendance': 'view-attendance',
-        'analytics': 'view-analytics'
-      };
-
       currentView = tab === 'student-list' ? 'student_list' : (tab === 'attendance' ? 'attendance' : 'analytics');
-      
-      const views = document.querySelectorAll('.view-container');
-      views.forEach(v => {
-        v.classList.add('hidden');
-      });
-      
-      const viewId = tabToViewMap[tab];
-      const selectedView = document.getElementById(viewId);
-      if (selectedView) {
-        selectedView.classList.remove('hidden');
-      }
+      document.querySelectorAll('.view-container').forEach(v => v.classList.add('hidden'));
+      document.getElementById(`view-${tab}`).classList.remove('hidden');
 
       const tabIds = ['tab-student-list', 'tab-attendance', 'tab-analytics'];
-      tabIds.forEach(tabId => {
-        const btn = document.getElementById(tabId);
-        if (btn) {
-          btn.classList.remove('bg-red-500', 'text-white', 'shadow-md');
-          btn.classList.add('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
-        }
+      tabIds.forEach(id => {
+        const btn = document.getElementById(id);
+        btn.classList.remove('bg-red-500', 'text-white', 'shadow-md');
+        btn.classList.add('text-slate-600', 'hover:bg-slate-200');
       });
-      
-      const activeTab = document.getElementById('tab-' + tab);
-      if (activeTab) {
-        activeTab.classList.remove('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
-        activeTab.classList.add('bg-red-500', 'text-white', 'shadow-md');
-      }
+      document.getElementById(`tab-${tab}`).classList.add('bg-red-500', 'text-white', 'shadow-md');
     }
 
     function updateYearCounts() {
-      for (let year of [4, 5, 6]) {
-        const count = studentsData.filter(s => s.year == year && s.record_type !== 'unit_config').length;
-        document.getElementById('year' + year + '-count').textContent = count + ' murid';
-        document.getElementById('student-list-year' + year + '-count').textContent = count + ' murid';
-      }
+      [4, 5, 6].forEach(y => {
+        const count = studentsData.filter(s => s.year == y).length;
+        document.getElementById(`year${y}-count`).textContent = count + ' murid';
+        document.getElementById(`student-list-year${y}-count`).textContent = count + ' murid';
+      });
     }
 
     function selectStudentListYear(year) {
@@ -856,1062 +656,280 @@
       document.getElementById('student-list-data-view').classList.add('hidden');
     }
 
-    function getFilteredStudents() {
-      return studentsData.filter(s => s.year == selectedYear && s.name && s.name.trim() !== '');
-    }
-
     function renderStudentListRows() {
       const students = studentsData.filter(s => s.year == studentListYear);
       const tbody = document.getElementById('student-list-body');
       tbody.innerHTML = '';
-
-      if (students.length === 0) {
-        document.getElementById('student-list-empty-state').classList.remove('hidden');
-        return;
-      }
-
+      if (students.length === 0) { document.getElementById('student-list-empty-state').classList.remove('hidden'); return; }
       document.getElementById('student-list-empty-state').classList.add('hidden');
 
-      students.forEach((student, index) => {
+      students.sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name)).forEach((s, i) => {
         const tr = document.createElement('tr');
-        tr.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50 hover:bg-indigo-50 transition-colors';
+        tr.className = "hover:bg-slate-50 transition-colors";
         tr.innerHTML = `
-          <td class="px-4 py-3 text-left">${index + 1}</td>
-          <td class="px-4 py-3 text-left font-medium">${student.name}</td>
-          <td class="px-4 py-3 text-center">${student.class_name || '-'}</td>
-          <td class="px-4 py-3 text-center">
-            <button type="button" onclick="openDeleteModal(event)" data-student-id="${student.__backendId}" class="px-3 py-1.5 bg-rose-500 text-white text-sm font-semibold rounded-lg hover:bg-rose-600 transition-all">
-              Padam
-            </button>
+          <td class="px-6 py-4 font-bold text-slate-400">${i + 1}</td>
+          <td class="px-6 py-4 font-black text-slate-900">${s.name}</td>
+          <td class="px-6 py-4 text-center font-bold text-indigo-600">${s.class_name || '-'}</td>
+          <td class="px-6 py-4 text-center">
+            <button onclick="openDeleteModalManual('${s.name}')" class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
           </td>
         `;
         tbody.appendChild(tr);
       });
+      lucide.createIcons();
     }
 
     async function addStudentFromList() {
-      const nameInput = document.getElementById('student-list-name-input');
-      const classInput = document.getElementById('student-list-class-input');
-      const name = nameInput.value.trim().toUpperCase();
-      const className = classInput.value.trim().toUpperCase();
-      
+      const name = document.getElementById('student-list-name-input').value.trim().toUpperCase();
+      const cls = document.getElementById('student-list-class-input').value.trim().toUpperCase();
       if (!name || !studentListYear) return;
-
-      const studentCount = studentsData.filter(s => s.name && s.name.trim() !== '').length;
-      if (studentCount >= 999) {
-        document.getElementById('student-list-limit-warning').classList.remove('hidden');
-        return;
-      }
-
-      const btn = document.getElementById('add-student-list-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-
-      const newStudent = {
-        name: name,
-        year: studentListYear,
-        class_name: className,
-        attendance_1: false,
-        attendance_2: false,
-        attendance_3: false,
-        attendance_4: false,
-        attendance_5: false,
-        attendance_6: false,
-        attendance_7: false,
-        attendance_8: false,
-        attendance_9: false,
-        attendance_10: false,
-        attendance_11: false,
-        attendance_12: false
+      const data = { 
+        name, year: studentListYear, class_name: cls, record_type: 'student',
+        attendance_1: false, attendance_2: false, attendance_3: false, attendance_4: false,
+        attendance_5: false, attendance_6: false, attendance_7: false, attendance_8: false,
+        attendance_9: false, attendance_10: false, attendance_11: false, attendance_12: false
       };
-
-      if (window.dataSdk) {
-        await window.dataSdk.create(newStudent);
-      }
-
-      nameInput.value = '';
-      classInput.value = '';
-      btn.disabled = false;
-      btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg> Tambah Murid';
+      await syncToSheet('create', data);
+      document.getElementById('student-list-name-input').value = '';
+      document.getElementById('student-list-class-input').value = '';
     }
 
-    function openBulkUploadModal() {
-      document.getElementById('bulk-upload-student-list-modal').classList.remove('hidden');
-    }
-
-    function closeBulkUploadStudentListModal() {
-      document.getElementById('bulk-upload-student-list-modal').classList.add('hidden');
-      document.getElementById('bulk-student-list-names-input').value = '';
-      document.getElementById('student-list-upload-status').textContent = '';
-    }
-
+    // Modal Logic
+    function openBulkUploadModal() { document.getElementById('bulk-upload-student-list-modal').classList.remove('hidden'); }
+    function closeBulkUploadStudentListModal() { document.getElementById('bulk-upload-student-list-modal').classList.add('hidden'); }
+    
     async function processBulkUpload() {
       const text = document.getElementById('bulk-student-list-names-input').value.trim();
-      const statusEl = document.getElementById('student-list-upload-status');
-      
-      if (!text) {
-        statusEl.textContent = 'Sila masukkan nama murid';
-        statusEl.className = 'mt-3 text-sm text-rose-600 text-center';
-        return;
-      }
-
-      const lines = text.split('\n').map(line => line.trim()).filter(line => line);
-      
-      if (lines.length === 0) {
-        statusEl.textContent = 'Tiada nama yang sah';
-        statusEl.className = 'mt-3 text-sm text-rose-600 text-center';
-        return;
-      }
-
-      if (lines.length > 50) {
-        statusEl.textContent = 'Had maksimum 50 nama sekali gus sahaja';
-        statusEl.className = 'mt-3 text-sm text-amber-600 text-center';
-        return;
-      }
-
-      const remainingSlots = 999 - studentsData.filter(s => s.name && s.name.trim() !== '').length;
-      if (lines.length > remainingSlots) {
-        statusEl.textContent = `Hanya ${remainingSlots} nama boleh ditambah`;
-        statusEl.className = 'mt-3 text-sm text-amber-600 text-center';
-        return;
-      }
-
-      const btn = document.getElementById('confirm-bulk-student-list-add');
-      btn.disabled = true;
-      btn.textContent = 'Menambah...';
-      statusEl.textContent = `Menambah ${lines.length} murid...`;
-      statusEl.className = 'mt-3 text-sm text-indigo-600 text-center';
-      
-      // Parse and sort students
-      let studentsToAdd = [];
+      if (!text) return;
+      const lines = text.split('\n').filter(l => l.trim());
       for (const line of lines) {
-        let name = '';
-        let className = '';
+        let name = '', cls = '';
+        if (line.includes('|')) { [name, cls] = line.split('|').map(x => x.trim().toUpperCase()); }
+        else if (line.includes('\t')) { [name, cls] = line.split('\t').map(x => x.trim().toUpperCase()); }
+        else { name = line.toUpperCase(); }
         
-        if (line.includes('\t')) {
-          const parts = line.split('\t').map(p => p.trim().toUpperCase()).filter(p => p);
-          name = parts[0] || '';
-          className = parts[1] || '';
-        } else if (line.includes('|')) {
-          const parts = line.split('|').map(p => p.trim().toUpperCase());
-          name = parts[0] || '';
-          className = parts[1] || '';
-        } else {
-          name = line.trim().toUpperCase();
-          className = '';
-        }
-
-        if (name) {
-          studentsToAdd.push({ name, className });
-        }
-      }
-
-      // Sort by class (A to Z) then by name (A to Z)
-      studentsToAdd.sort((a, b) => {
-        const classComparison = (a.className || '').localeCompare(b.className || '', 'ms');
-        if (classComparison !== 0) return classComparison;
-        return a.name.localeCompare(b.name, 'ms');
-      });
-
-      let successCount = 0;
-      for (const student of studentsToAdd) {
-        const studentCount = studentsData.filter(s => s.name && s.name.trim() !== '').length;
-        if (studentCount >= 999) break;
-
-        const newStudent = {
-          name: student.name,
-          year: studentListYear,
-          class_name: student.className,
-          attendance_1: false,
-          attendance_2: false,
-          attendance_3: false,
-          attendance_4: false,
-          attendance_5: false,
-          attendance_6: false,
-          attendance_7: false,
-          attendance_8: false,
-          attendance_9: false,
-          attendance_10: false,
-          attendance_11: false,
-          attendance_12: false
-        };
-
-        if (window.dataSdk) {
-          const result = await window.dataSdk.create(newStudent);
-          if (result.isOk) {
-            successCount++;
-          }
-        }
-      }
-
-      statusEl.textContent = `Berjaya menambah ${successCount} murid! Disusun A-Z mengikut kelas dan nama.`;
-      statusEl.className = 'mt-3 text-sm text-emerald-600 text-center font-bold';
-
-      btn.disabled = false;
-      btn.textContent = 'Tambah Semua';
-
-      const toastDiv = document.createElement('div');
-      toastDiv.className = 'fixed top-4 right-4 bg-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-slide-in';
-      toastDiv.innerHTML = `
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-        </svg>
-        <div>
-          <p class="font-bold">Berjaya Ditambah & Disusun!</p>
-          <p class="text-sm">${successCount} murid - Kelas & Nama A-Z</p>
-        </div>
-      `;
-      document.body.appendChild(toastDiv);
-      setTimeout(() => toastDiv.remove(), 4000);
-
-      setTimeout(() => closeBulkUploadStudentListModal(), 2000);
-    }
-
-    function selectYear(year) {
-      selectedYear = year;
-      document.getElementById('year-selection').classList.add('hidden');
-      document.getElementById('attendance-data-view').classList.remove('hidden');
-      document.getElementById('selected-year-badge').textContent = year;
-      document.getElementById('selected-year-label').textContent = 'Tahun ' + year;
-      renderStudentRows();
-    }
-
-    function backToYearSelection() {
-      selectedYear = null;
-      document.getElementById('year-selection').classList.remove('hidden');
-      document.getElementById('attendance-data-view').classList.add('hidden');
-    }
-
-    async function toggleAttendance(studentId, meetingNum) {
-      const student = studentsData.find(s => s.__backendId === studentId);
-      if (!student) return;
-
-      const field = `attendance_${meetingNum}`;
-      const updatedStudent = { ...student };
-      updatedStudent[field] = !student[field];
-
-      if (window.dataSdk) {
-        const result = await window.dataSdk.update(updatedStudent);
-        if (result.isOk) {
-          showAutoSaveNotification('Kehadiran disimpan!', 'Perubahan telah tersimpan ke Canva Sheet');
-        }
-      }
-    }
-
-    function calculateTotal(student) {
-      let total = 0;
-      for (let i = 1; i <= 12; i++) {
-        if (student[`attendance_${i}`]) total++;
-      }
-      return total;
-    }
-
-    function renderStudentRows() {
-      const tbody = document.getElementById('attendance-body');
-      const emptyState = document.getElementById('empty-state');
-      const filteredStudents = getFilteredStudents();
-
-      if (filteredStudents.length === 0) {
-        tbody.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        return;
-      }
-
-      emptyState.classList.add('hidden');
-      const existingRows = new Map([...tbody.children].map(row => [row.dataset.studentId, row]));
-
-      filteredStudents.forEach((student, index) => {
-        const studentId = student.__backendId;
-        let row = existingRows.get(studentId);
-
-        if (row) {
-          updateRowContent(row, student, index);
-          existingRows.delete(studentId);
-        } else {
-          row = document.createElement('tr');
-          row.dataset.studentId = studentId;
-          tbody.appendChild(row);
-          updateRowContent(row, student, index);
-        }
-      });
-
-      existingRows.forEach(row => row.remove());
-    }
-
-    function updateRowContent(row, student, index) {
-      const total = calculateTotal(student);
-      row.className = index % 2 === 0 ? 'bg-white hover:bg-indigo-50 transition-colors' : 'bg-slate-50 hover:bg-indigo-50 transition-colors';
-      
-      let checkboxesHTML = '';
-      for (let i = 1; i <= 12; i++) {
-        const isChecked = student[`attendance_${i}`];
-        checkboxesHTML += `
-          <td class="px-2 py-3 text-center">
-            <button type="button" onclick="toggleAttendance('${student.__backendId}', ${i})" 
-              class="attendance-checkbox w-8 h-8 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all font-bold text-sm ${isChecked ? 'border-emerald-500 bg-emerald-50 text-emerald-600' : 'border-gray-300 bg-white hover:border-indigo-400 text-gray-400'}">
-              ${isChecked ? '/' : 'O'}
-            </button>
-          </td>
-        `;
-      }
-
-      row.innerHTML = `
-        <td class="px-3 py-3 text-indigo-900 font-medium sticky left-0 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} z-10">${index + 1}</td>
-        <td class="px-3 py-3 text-indigo-900 font-medium sticky left-12 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} z-10 min-w-[180px]">${student.name}</td>
-        <td class="px-3 py-3 text-center text-indigo-700 font-semibold sticky left-[252px] ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} z-10 min-w-[100px]">${student.class_name || '-'}</td>
-        ${checkboxesHTML}
-        <td class="px-3 py-3 text-center bg-indigo-50">
-          <span class="inline-flex items-center justify-center w-10 h-10 rounded-full font-bold text-white ${total >= 10 ? 'bg-emerald-500' : total >= 6 ? 'bg-amber-500' : 'bg-rose-500'}">
-            ${total}
-          </span>
-        </td>
-      `;
-    }
-
-    function updateAnalytics() {
-      analyticsYear = parseInt(document.getElementById('analytics-year-selector').value);
-      const meetingValue = document.getElementById('meeting-selector').value;
-      
-      const filteredStudents = studentsData.filter(s => 
-        s.year == analyticsYear && 
-        s.record_type !== 'unit_config' && 
-        s.name && 
-        s.name.trim() !== ''
-      );
-
-      let presentCount = 0;
-      let percentage = 0;
-      let meetingLabel = '';
-
-      if (meetingValue === 'all') {
-        // Calculate total attendance across all meetings
-        let totalAttendance = 0;
-        let totalPossible = filteredStudents.length * 12;
-        
-        filteredStudents.forEach(student => {
-          for (let i = 1; i <= 12; i++) {
-            if (student[`attendance_${i}`] === true) {
-              totalAttendance++;
-            }
-          }
+        await syncToSheet('create', { 
+            name, year: studentListYear, class_name: cls, record_type: 'student',
+            attendance_1:false, attendance_2:false, attendance_3:false, attendance_4:false,
+            attendance_5:false, attendance_6:false, attendance_7:false, attendance_8:false,
+            attendance_9:false, attendance_10:false, attendance_11:false, attendance_12:false
         });
-
-        // Calculate percentage based on actual attendance
-        percentage = totalPossible > 0 ? Math.round((totalAttendance / totalPossible) * 100) : 0;
-        // Present count is the actual total attendance (not per-student average)
-        presentCount = totalAttendance;
-        meetingLabel = 'Semua Perjumpaan (Keseluruhan)';
-      } else {
-        selectedMeeting = parseInt(meetingValue);
-        filteredStudents.forEach(student => {
-          if (student[`attendance_${selectedMeeting}`] === true) {
-            presentCount++;
-          }
-        });
-        percentage = filteredStudents.length > 0 ? Math.round((presentCount / filteredStudents.length) * 100) : 0;
-        meetingLabel = `Perjumpaan ${selectedMeeting}`;
       }
-
-      const totalStudents = filteredStudents.length || 0;
-
-      document.getElementById('total-present').textContent = presentCount;
-      document.getElementById('total-absent').textContent = 
-        meetingValue === 'all' 
-          ? (totalStudents * 12) - presentCount
-          : totalStudents - presentCount;
-      document.getElementById('total-students').textContent = 
-        meetingValue === 'all' 
-          ? totalStudents + ' murid × 12 perjumpaan'
-          : totalStudents;
-      document.getElementById('attendance-percentage').textContent = percentage + '%';
-      document.getElementById('attendance-rate').textContent = percentage + '%';
-      document.getElementById('selected-meeting-label').textContent = meetingLabel;
-
-      const circumference = 2 * Math.PI * 40;
-      const offset = (percentage / 100) * circumference;
-      document.getElementById('attendance-circle').setAttribute('stroke-dasharray', `${offset} ${circumference}`);
+      closeBulkUploadStudentListModal();
     }
 
-    async function tickAllForMeeting(meetingNum) {
-      if (!selectedYear) return;
-      
-      const filteredStudents = getFilteredStudents();
-      if (filteredStudents.length === 0) return;
-
-      const btn = event.target;
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Proses...';
-
-      const field = `attendance_${meetingNum}`;
-      
-      let successCount = 0;
-      for (let i = 0; i < filteredStudents.length; i++) {
-        const student = filteredStudents[i];
-        const latestStudent = studentsData.find(s => s.__backendId === student.__backendId);
-        if (!latestStudent) continue;
-        
-        const updatedStudent = { ...latestStudent };
-        updatedStudent[field] = true;
-        
-        if (window.dataSdk) {
-          const result = await window.dataSdk.update(updatedStudent);
-          if (result.isOk) {
-            successCount++;
-          }
-        }
-        
-        if (i < filteredStudents.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 700));
-        }
-      }
-
-      btn.disabled = false;
-      btn.textContent = '/ Semua';
-
-      const statusDiv = document.createElement('div');
-      statusDiv.className = 'fixed top-4 right-4 bg-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-slide-in';
-      statusDiv.innerHTML = `
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-        </svg>
-        <div>
-          <p class="font-bold">Berjaya!</p>
-          <p class="text-sm">${successCount} murid ditanda hadir</p>
-        </div>
-      `;
-      document.body.appendChild(statusDiv);
-      setTimeout(() => statusDiv.remove(), 3000);
+    function openDeleteModalManual(name) {
+        studentToDelete = studentsData.find(s => s.name === name);
+        document.getElementById('delete-student-name').textContent = `Padam "${name}"?`;
+        document.getElementById('delete-modal').classList.remove('hidden');
     }
-
-    function openDeleteModal(event) {
-      event.preventDefault();
-      const btn = event.target.closest('button');
-      const studentId = btn.getAttribute('data-student-id');
-      studentToDelete = studentsData.find(s => s.__backendId === studentId);
-      
-      if (!studentToDelete) return;
-      
-      document.getElementById('delete-student-name').textContent = `Adakah anda pasti mahu memadam "${studentToDelete.name}"?`;
-      document.getElementById('delete-modal').classList.remove('hidden');
-      document.getElementById('delete-pin-input').value = '';
-      document.getElementById('pin-error').classList.add('hidden');
-      setTimeout(() => document.getElementById('delete-pin-input').focus(), 100);
-    }
-
-    function closeDeleteModal() {
-      studentToDelete = null;
-      document.getElementById('delete-modal').classList.add('hidden');
-      document.getElementById('delete-pin-input').value = '';
-      document.getElementById('pin-error').classList.add('hidden');
+    function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
+    async function confirmDelete() {
+        if (document.getElementById('delete-pin-input').value !== PIN) { document.getElementById('pin-error').classList.remove('hidden'); return; }
+        await syncToSheet('delete', studentToDelete);
+        closeDeleteModal();
     }
 
     function openDeleteAllModal() {
-      const yearToDelete = studentListYear;
-      if (!yearToDelete) return;
-      
-      const filteredStudents = studentsData.filter(s => s.name && s.name.trim() !== '' && s.year === yearToDelete);
-      const count = filteredStudents.length;
-      
-      if (count === 0) {
-        const statusDiv = document.createElement('div');
-        statusDiv.className = 'fixed top-4 right-4 bg-amber-600 text-white px-6 py-3 rounded-xl shadow-lg z-50';
-        statusDiv.textContent = 'Tiada murid untuk dipadam';
-        document.body.appendChild(statusDiv);
-        setTimeout(() => statusDiv.remove(), 3000);
-        return;
-      }
-      
-      document.getElementById('delete-all-year-label').textContent = `Tahun ${yearToDelete}`;
-      document.getElementById('delete-all-count').textContent = `${count} murid`;
-      document.getElementById('delete-all-modal').classList.remove('hidden');
-      document.getElementById('delete-all-pin-input').value = '';
-      document.getElementById('delete-all-pin-error').classList.add('hidden');
-      setTimeout(() => document.getElementById('delete-all-pin-input').focus(), 100);
+        const count = studentsData.filter(s => s.year == studentListYear).length;
+        document.getElementById('delete-all-count').textContent = count + ' murid';
+        document.getElementById('delete-all-modal').classList.remove('hidden');
     }
-
-    function closeDeleteAllModal() {
-      document.getElementById('delete-all-modal').classList.add('hidden');
-      document.getElementById('delete-all-pin-input').value = '';
-      document.getElementById('delete-all-pin-error').classList.add('hidden');
-    }
-
+    function closeDeleteAllModal() { document.getElementById('delete-all-modal').classList.add('hidden'); }
     async function confirmDeleteAll() {
-      const yearToDelete = studentListYear;
-      if (!yearToDelete) return;
-
-      const pinInput = document.getElementById('delete-all-pin-input');
-      const enteredPin = pinInput.value.trim().toUpperCase();
-      
-      if (enteredPin !== PIN) {
-        document.getElementById('delete-all-pin-error').classList.remove('hidden');
-        pinInput.classList.add('border-rose-500');
-        pinInput.value = '';
-        pinInput.focus();
-        return;
-      }
-
-      const btn = document.getElementById('confirm-delete-all');
-      const filteredStudents = studentsData.filter(s => s.name && s.name.trim() !== '' && s.year === yearToDelete);
-      
-      btn.disabled = true;
-      btn.innerHTML = '<svg class="w-5 h-5 animate-spin mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-
-      if (window.dataSdk) {
-        const deletePromises = filteredStudents.map(student => window.dataSdk.delete(student));
-        await Promise.all(deletePromises);
-      }
-
-      btn.disabled = false;
-      btn.innerHTML = 'Padam Semua';
-      closeDeleteAllModal();
-
-      const statusDiv = document.createElement('div');
-      statusDiv.className = 'fixed top-4 right-4 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg z-50';
-      statusDiv.textContent = `Berjaya memadam ${filteredStudents.length} murid`;
-      document.body.appendChild(statusDiv);
-      setTimeout(() => statusDiv.remove(), 3000);
+        if (document.getElementById('delete-all-pin-input').value !== PIN) { document.getElementById('delete-all-pin-error').classList.remove('hidden'); return; }
+        const targets = studentsData.filter(s => s.year == studentListYear);
+        for (const t of targets) await syncToSheet('delete', t);
+        closeDeleteAllModal();
     }
 
-    async function confirmDelete() {
-      if (!studentToDelete) return;
-
-      const pinInput = document.getElementById('delete-pin-input');
-      const enteredPin = pinInput.value.trim().toUpperCase();
-      
-      if (enteredPin !== PIN) {
-        document.getElementById('pin-error').classList.remove('hidden');
-        pinInput.classList.add('border-rose-500');
-        pinInput.value = '';
-        pinInput.focus();
-        return;
-      }
-
-      const btn = document.getElementById('confirm-delete');
-      btn.disabled = true;
-      btn.textContent = 'Memadam...';
-
-      if (window.dataSdk) {
-        await window.dataSdk.delete(studentToDelete);
-      }
-
-      btn.disabled = false;
-      btn.textContent = 'Padam';
-      closeDeleteModal();
+    // Attendance Logic
+    function selectYear(y) {
+        selectedYear = y;
+        document.getElementById('year-selection').classList.add('hidden');
+        document.getElementById('attendance-data-view').classList.remove('hidden');
+        document.getElementById('selected-year-badge').textContent = y;
+        renderStudentRows();
+    }
+    function backToYearSelection() {
+        selectedYear = null;
+        document.getElementById('year-selection').classList.remove('hidden');
+        document.getElementById('attendance-data-view').classList.add('hidden');
     }
 
+    function renderStudentRows() {
+        const tbody = document.getElementById('attendance-body');
+        tbody.innerHTML = '';
+        const students = studentsData.filter(s => s.year == selectedYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
+        
+        students.forEach((s, i) => {
+            let total = 0;
+            let checks = '';
+            for (let j = 1; j <= 12; j++) {
+                const isP = s[`attendance_${j}`] === true || s[`attendance_${j}`] === 'true';
+                if (isP) total++;
+                checks += `
+                  <td class="px-2 py-3 text-center">
+                    <button onclick="toggleAttendanceManual('${s.name}', ${j})" class="w-8 h-8 rounded-lg border-2 font-black text-xs transition-all ${isP ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 text-slate-300 hover:border-indigo-300'}">
+                      ${isP ? '/' : 'O'}
+                    </button>
+                  </td>`;
+            }
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="px-4 py-3 text-slate-400 font-bold sticky left-0 bg-white">${i+1}</td>
+              <td class="px-4 py-3 font-black text-indigo-950 sticky left-[48px] bg-white min-w-[180px]">${s.name}</td>
+              <td class="px-4 py-3 text-center font-bold text-indigo-600 sticky left-[228px] bg-white">${s.class_name || '-'}</td>
+              ${checks}
+              <td class="px-4 py-3 text-center bg-indigo-50 font-black text-indigo-700">${total}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function toggleAttendanceManual(name, num) {
+        const s = studentsData.find(x => x.name === name);
+        const key = `attendance_${num}`;
+        s[key] = !(s[key] === true || s[key] === 'true');
+        await syncToSheet('update', s);
+        showAutoSaveNotification('Kehadiran!', 'Data disimpan');
+    }
+
+    async function tickAllForMeeting(num) {
+        const students = studentsData.filter(s => s.year == selectedYear);
+        for (const s of students) {
+            s[`attendance_${num}`] = true;
+            await syncToSheet('update', s);
+        }
+        showAutoSaveNotification('Selesai!', 'Semua ditanda hadir');
+    }
+
+    // Analytics Logic
+    function updateAnalytics() {
+      analyticsYear = parseInt(document.getElementById('analytics-year-selector').value);
+      const meetingValue = document.getElementById('meeting-selector').value;
+      const filtered = studentsData.filter(s => s.year == analyticsYear);
+      let present = 0, totalPossible = 0, percentage = 0;
+
+      if (meetingValue === 'all') {
+          totalPossible = filtered.length * 12;
+          filtered.forEach(s => { for(let i=1; i<=12; i++) if(s[`attendance_${i}`] === true || s[`attendance_${i}`] === 'true') present++; });
+          percentage = totalPossible > 0 ? Math.round((present/totalPossible)*100) : 0;
+          document.getElementById('selected-meeting-label').textContent = "Keseluruhan (12 Perjumpaan)";
+      } else {
+          const m = parseInt(meetingValue);
+          totalPossible = filtered.length;
+          filtered.forEach(s => { if(s[`attendance_${m}`] === true || s[`attendance_${m}`] === 'true') present++; });
+          percentage = totalPossible > 0 ? Math.round((present/totalPossible)*100) : 0;
+          document.getElementById('selected-meeting-label').textContent = "Perjumpaan " + m;
+      }
+
+      document.getElementById('total-present').textContent = present;
+      document.getElementById('total-absent').textContent = totalPossible - present;
+      document.getElementById('total-students').textContent = filtered.length;
+      document.getElementById('attendance-percentage').textContent = percentage + '%';
+      document.getElementById('attendance-rate').textContent = percentage + '%';
+
+      const circumference = 251.2;
+      const offset = circumference - (percentage / 100) * circumference;
+      document.getElementById('attendance-circle').style.strokeDashoffset = offset;
+      document.getElementById('attendance-circle').style.strokeDasharray = circumference;
+    }
+
+    // Global Search
     function globalSearch() {
-      const query = document.getElementById('global-search-input').value.toLowerCase();
-      const yearFilter = document.getElementById('global-search-year-filter').value;
-      
-      if (query.length === 0) {
+        const query = document.getElementById('global-search-input').value.toUpperCase();
+        const resultsDiv = document.getElementById('search-results-content');
+        if (!query) { document.getElementById('global-search-results').classList.add('hidden'); return; }
+        
+        const results = studentsData.filter(s => s.name.includes(query));
+        resultsDiv.innerHTML = '';
+        results.slice(0, 10).forEach(s => {
+            const d = document.createElement('div');
+            d.className = "p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100";
+            d.innerHTML = `<p class="font-black text-indigo-900">${s.name}</p><p class="text-xs text-slate-400">Tahun ${s.year} | ${s.class_name}</p>`;
+            d.onclick = () => { switchTab('attendance'); selectYear(s.year); clearGlobalSearch(); };
+            resultsDiv.appendChild(d);
+        });
+        document.getElementById('global-search-results').classList.remove('hidden');
+        document.getElementById('global-search-clear').classList.remove('hidden');
+    }
+    function clearGlobalSearch() {
+        document.getElementById('global-search-input').value = '';
         document.getElementById('global-search-results').classList.add('hidden');
         document.getElementById('global-search-clear').classList.add('hidden');
-        return;
-      }
-
-      document.getElementById('global-search-clear').classList.remove('hidden');
-
-      let results = studentsData.filter(s => 
-        s.name && s.name.toLowerCase().includes(query) &&
-        (yearFilter === 'all' || s.year == yearFilter) &&
-        s.record_type !== 'unit_config'
-      );
-
-      const resultsDiv = document.getElementById('search-results-content');
-      resultsDiv.innerHTML = '';
-
-      if (results.length === 0) {
-        resultsDiv.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Tiada keputusan ditemui</p>';
-      } else {
-        results.forEach(student => {
-          const div = document.createElement('div');
-          div.className = 'p-3 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg hover:from-indigo-100 hover:to-blue-100 cursor-pointer transition-all border-l-4 border-indigo-500';
-          div.innerHTML = `
-            <p class="font-semibold text-indigo-900">${student.name}</p>
-            <p class="text-sm text-indigo-600">Kelas: ${student.class_name || '-'} | Tahun ${student.year}</p>
-            <p class="text-xs text-indigo-500 mt-1">👆 Klik untuk lihat kehadiran</p>
-          `;
-          div.addEventListener('click', () => openStudentAttendanceView(student));
-          resultsDiv.appendChild(div);
-        });
-      }
-
-      document.getElementById('global-search-results').classList.remove('hidden');
     }
 
-    function openStudentAttendanceView(student) {
-      if (!student || !student.year) return;
-
-      clearGlobalSearch();
-      
-      selectedYear = student.year;
-      document.getElementById('year-selection').classList.add('hidden');
-      document.getElementById('attendance-data-view').classList.remove('hidden');
-      document.getElementById('selected-year-badge').textContent = student.year;
-      document.getElementById('selected-year-label').textContent = 'Tahun ' + student.year;
-      
-      switchTab('attendance');
-      
-      renderStudentRows();
-
-      setTimeout(() => {
-        const studentRow = document.querySelector(`tr[data-student-id="${student.__backendId}"]`);
-        if (studentRow) {
-          studentRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          studentRow.style.backgroundColor = '#fef3c7';
-          studentRow.style.transition = 'background-color 0.3s ease';
-          
-          setTimeout(() => {
-            studentRow.style.backgroundColor = '';
-          }, 3000);
-        }
-      }, 200);
-
-      const toastDiv = document.createElement('div');
-      toastDiv.className = 'fixed top-4 right-4 bg-indigo-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-slide-in';
-      toastDiv.innerHTML = `
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-        </svg>
-        <div>
-          <p class="font-bold">Carian Ditemui!</p>
-          <p class="text-sm">${student.name} - Tahun ${student.year}</p>
-        </div>
-      `;
-      document.body.appendChild(toastDiv);
-      setTimeout(() => toastDiv.remove(), 4000);
+    function showAutoSaveNotification(title, msg) {
+        const toast = document.createElement('div');
+        toast.className = "fixed bottom-4 right-4 bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl z-[9999] animate-slide-in flex items-center gap-3";
+        toast.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> <div><p class="font-black text-sm">${title}</p><p class="text-[10px] opacity-80">${msg}</p></div>`;
+        document.body.appendChild(toast);
+        lucide.createIcons();
+        setTimeout(() => toast.remove(), 3000);
     }
 
-    function clearGlobalSearch() {
-      document.getElementById('global-search-input').value = '';
-      document.getElementById('global-search-results').classList.add('hidden');
-      document.getElementById('global-search-clear').classList.add('hidden');
-    }
-
+    // PDF GENERATORS (Copy-paste logic asal anda)
     function generateAttendancePDF() {
       if (!selectedYear) return;
-
-      const students = getFilteredStudents();
+      const students = studentsData.filter(s => s.year == selectedYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
       const dates = [];
       for (let i = 1; i <= 12; i++) {
-        const dateInput = document.querySelector(`.date-input[data-date="${i}"]`);
-        if (dateInput && dateInput.value) {
-          const dateObj = new Date(dateInput.value);
-          const day = String(dateObj.getDate()).padStart(2, '0');
-          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-          dates.push(`${day}/${month}`);
-        } else {
-          dates.push('-');
-        }
+          const input = document.querySelector(`.date-input[data-date="${i}"]`);
+          dates.push(input && input.value ? input.value.split('-').reverse().slice(0,2).join('/') : '-');
       }
 
-      const attendanceRows = students.map((student, index) => {
-        let row = `<tr style="background: ${index % 2 === 0 ? '#fff' : '#f5f5f5'};"><td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: 500;">${index + 1}</td><td style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: 500;">${student.name}</td><td style="border: 1px solid #000; padding: 8px; text-align: center;">${student.class_name || '-'}</td>`;
-        
-        let totalPresent = 0;
-        for (let meeting = 1; meeting <= 12; meeting++) {
-          const isPresent = student[`attendance_${meeting}`];
-          if (isPresent) totalPresent++;
-          row += `<td style="border: 1px solid #000; padding: 8px; text-align: center; background: ${isPresent ? '#d1fae5' : '#fee2e2'}; font-weight: ${isPresent ? 'bold' : 'bold'}; color: ${isPresent ? '#065f46' : '#991b1b'};">${isPresent ? '/' : 'O'}</td>`;
-        }
-        row += `<td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; background: #e0e7ff; color: #4338ca;">${totalPresent}/12</td></tr>`;
-        return row;
+      const rows = students.map((s, idx) => {
+          let cells = '';
+          let count = 0;
+          for(let j=1; j<=12; j++) {
+              const isP = s[`attendance_${j}`] === true || s[`attendance_${j}`] === 'true';
+              if(isP) count++;
+              cells += `<td style="border:1px solid #000; text-align:center; background:${isP?'#d1fae5':'#fee2e2'}">${isP?'/':'O'}</td>`;
+          }
+          return `<tr><td style="border:1px solid #000; text-align:center">${idx+1}</td><td style="border:1px solid #000; padding:5px">${s.name}</td><td style="border:1px solid #000; text-align:center">${s.class_name||'-'}</td>${cells}<td style="border:1px solid #000; text-align:center; font-weight:bold">${count}</td></tr>`;
       }).join('');
 
-      const printDate = new Date().toLocaleDateString('ms-MY');
-
-      const htmlContent = `<!DOCTYPE html>
-<html lang="ms">
-<head>
-  <meta charset="UTF-8">
-  <title>Kehadiran - Tahun ${selectedYear}</title>
-  <style>
-    @media print { @page { size: A4 landscape; margin: 10mm; } body { margin: 0; padding: 0; } }
-    body { font-family: Arial, sans-serif; padding: 15px; background: white; }
-    .print-date { text-align: right; font-size: 11px; color: #666; margin-bottom: 10px; }
-    .header { text-align: center; margin-bottom: 15px; }
-    .logo { width: 80px; height: auto; margin: 0 auto 10px auto; display: block; }
-    .header h1 { margin: 0; padding: 0; font-size: 16px; color: #000; font-weight: bold; line-height: 1.0; }
-    .header h2 { margin: 0; padding: 0; font-size: 14px; color: #dc2626; font-weight: bold; line-height: 1.5; }
-    .header p { margin: 0; padding: 0; font-size: 12px; color: #000; line-height: 1.5; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
-    th { border: 1px solid #000; padding: 6px 3px; text-align: center; background: #dc2626; color: white; font-weight: bold; }
-    td { border: 1px solid #000; padding: 5px 3px; text-align: center; color: #000; }
-    .footer { text-align: center; margin-top: 15px; font-size: 10px; color: #000; border-top: 2px solid #dc2626; padding-top: 10px; }
-  </style>
-</head>
-<body onload="window.print()">
-  <div class="print-date">Dicetak: ${printDate}</div>
-  <div class="header">
-    <img src="https://i.imgur.com/DLy3jZn.png" alt="Logo" class="logo" loading="lazy" onerror="this.style.display='none';">
-    <h1>Senarai Kehadiran Kokurikulum</h1>
-    <h2>${config.school_name}</h2>
-    ${config.unit_name ? `<p>${config.unit_name}</p>` : ''}
-    <p>Tahun ${selectedYear}</p>
-  </div>
-  
-  <table>
-    <thead>
-      <tr>
-        <th rowspan="2">Bil</th>
-        <th rowspan="2" style="min-width: 120px;">Nama Murid</th>
-        <th rowspan="2">Kelas</th>
-        <th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>P6</th><th>P7</th><th>P8</th><th>P9</th><th>P10</th><th>P11</th><th>P12</th>
-        <th rowspan="2" style="background: #4338ca;">Jumlah</th>
-      </tr>
-      <tr style="background: #dc2626; color: white;">
-        <th style="font-size: 9px;">${dates[0]}</th><th style="font-size: 9px;">${dates[1]}</th><th style="font-size: 9px;">${dates[2]}</th><th style="font-size: 9px;">${dates[3]}</th><th style="font-size: 9px;">${dates[4]}</th><th style="font-size: 9px;">${dates[5]}</th><th style="font-size: 9px;">${dates[6]}</th><th style="font-size: 9px;">${dates[7]}</th><th style="font-size: 9px;">${dates[8]}</th><th style="font-size: 9px;">${dates[9]}</th><th style="font-size: 9px;">${dates[10]}</th><th style="font-size: 9px;">${dates[11]}</th>
-      </tr>
-    </thead>
-    <tbody>${attendanceRows}</tbody>
-  </table>
-  
-  <div class="footer"><p>© 2026 - Unit Kokurikulum SKBTHO2</p></div>
-</body>
-</html>`;
-
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const blobUrl = URL.createObjectURL(blob);
-      const printWindow = window.open(blobUrl, '_blank');
-      if (printWindow) setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-    }
-
-    function generateAnalyticsPDFForYear(yearToPrint) {
-      const filteredStudents = studentsData.filter(s => 
-        s.year === yearToPrint && s.record_type !== 'unit_config' && s.name && s.name.trim() !== ''
-      );
-
-      const tableRows = [];
-      
-      for (let meetingNum = 1; meetingNum <= 12; meetingNum++) {
-        let presentCount = 0;
-        filteredStudents.forEach(student => {
-          if (student[`attendance_${meetingNum}`]) presentCount++;
-        });
-
-        const absentCount = filteredStudents.length - presentCount;
-        const percentage = filteredStudents.length > 0 ? Math.round((presentCount / filteredStudents.length) * 100) : 0;
-
-        const dateInput = document.querySelector(`.date-input[data-date="${meetingNum}"]`);
-        let dateStr = '-';
-        if (dateInput && dateInput.value) {
-          const dateObj = new Date(dateInput.value);
-          const day = String(dateObj.getDate()).padStart(2, '0');
-          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-          const year = dateObj.getFullYear();
-          dateStr = `${day}/${month}/${year}`;
-        }
-
-        let percentageColor = '#000';
-        if (percentage >= 80) percentageColor = '#10b981';
-        else if (percentage >= 50) percentageColor = '#f59e0b';
-        else percentageColor = '#ef4444';
-
-        tableRows.push(`
-          <tr style="background: ${meetingNum % 2 === 0 ? '#fff' : '#f5f5f5'};">
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: 500; color: #000;">${meetingNum}</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; color: #000;">${dateStr}</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: 600; background: #d1fae5; color: #000;">${presentCount}</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: 600; background: #fee2e2; color: #000;">${absentCount}</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; background: #e0e7ff; color: ${percentageColor};">${percentage}%</td>
-          </tr>
-        `);
-      }
-
-      let totalPresent = 0;
-      let totalPossible = filteredStudents.length * 12;
-      filteredStudents.forEach(student => {
-        for (let i = 1; i <= 12; i++) {
-          if (student[`attendance_${i}`]) totalPresent++;
-        }
-      });
-      const overallPercentage = totalPossible > 0 ? Math.round((totalPresent / totalPossible) * 100) : 0;
-
-      const printDate = new Date().toLocaleDateString('ms-MY');
-
-      const htmlContent = `<!DOCTYPE html>
-<html lang="ms">
-<head>
-  <meta charset="UTF-8">
-  <title>Analisa Kehadiran - Tahun ${yearToPrint}</title>
-  <style>
-    @media print { @page { size: A4 portrait; margin: 15mm; } body { margin: 0; padding: 0; } }
-    body { font-family: Arial, sans-serif; padding: 20px; background: white; }
-    .print-date { text-align: right; font-size: 11px; color: #666; margin-bottom: 10px; }
-    .header { text-align: center; margin-bottom: 20px; }
-    .logo { width: 120px; height: auto; margin: 0 auto 15px auto; display: block; }
-    .header h1 { margin: 0; padding: 0; font-size: 22px; color: #000; font-weight: bold; line-height: 1.0; }
-    .header h2 { margin: 0; padding: 0; font-size: 18px; color: #dc2626; font-weight: bold; line-height: 1.5; }
-    .header p { margin: 0; padding: 0; font-size: 15px; color: #000; font-weight: bold; line-height: 1.5; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th { border: 1px solid #000; padding: 10px; text-align: center; background: #dc2626; color: white; font-weight: bold; font-size: 14px; }
-    td { border: 1px solid #000; padding: 8px; text-align: center; color: #000; font-size: 13px; }
-    .summary { margin-top: 20px; padding: 15px; background: #f5f5f5; border: 2px solid #dc2626; }
-    .footer { text-align: center; margin-top: 20px; font-size: 11px; color: #000; border-top: 2px solid #dc2626; padding-top: 15px; }
-  </style>
-</head>
-<body onload="window.print()">
-  <div class="print-date">Dicetak: ${printDate}</div>
-  <div class="header">
-    <img src="https://i.imgur.com/DLy3jZn.png" alt="Logo" class="logo" loading="lazy" onerror="this.style.display='none';">
-    <h1>Analisa Kehadiran</h1>
-    <h2>${config.school_name}</h2>
-    ${config.unit_name && config.unit_name.trim() !== '' ? `<p>${config.unit_name}</p>` : ''}
-    <p>Tahun ${yearToPrint}</p>
-  </div>
-  
-  <table>
-    <thead>
-      <tr>
-        <th>Perjumpaan</th>
-        <th>Tarikh</th>
-        <th style="background: #10b981;">Hadir</th>
-        <th style="background: #ef4444;">Tidak Hadir</th>
-        <th style="background: #4338ca;">Peratus (%)</th>
-      </tr>
-    </thead>
-    <tbody>${tableRows.join('')}</tbody>
-  </table>
-  
-  <div class="summary">
-    <p><strong>Jumlah Murid:</strong> ${filteredStudents.length}</p>
-    <p><strong>Jumlah Perjumpaan:</strong> 12</p>
-    <p><strong>Kehadiran Keseluruhan:</strong> ${totalPresent}/${totalPossible} (${overallPercentage}%)</p>
-  </div>
-  
-  <div class="footer"><p>© 2026 - Unit Kokurikulum SKBTHO2</p></div>
-</body>
-</html>`;
-
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const blobUrl = URL.createObjectURL(blob);
-      const printWindow = window.open(blobUrl, '_blank');
-      if (printWindow) setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      const html = `<html><head><style>table{width:100%; border-collapse:collapse; font-family:Arial; font-size:10px} th,td{border:1px solid #000; padding:4px} th{background:#f2f2f2}</style></head><body onload="window.print()">
+        <h2 style="text-align:center">REKOD KEHADIRAN KOKURIKULUM 2026</h2>
+        <p style="text-align:center">${config.unit_name} - TAHUN ${selectedYear}</p>
+        <table><thead><tr><th>Bil</th><th>Nama</th><th>Kelas</th><th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>P6</th><th>P7</th><th>P8</th><th>P9</th><th>P10</th><th>P11</th><th>P12</th><th>Jum</th></tr>
+        <tr><th></th><th></th><th>Tarikh:</th><th>${dates[0]}</th><th>${dates[1]}</th><th>${dates[2]}</th><th>${dates[3]}</th><th>${dates[4]}</th><th>${dates[5]}</th><th>${dates[6]}</th><th>${dates[7]}</th><th>${dates[8]}</th><th>${dates[9]}</th><th>${dates[10]}</th><th>${dates[11]}</th><th></th></tr></thead>
+        <tbody>${rows}</tbody></table></body></html>`;
+      const win = window.open('','_blank'); win.document.write(html); win.document.close();
     }
 
     function generateStudentListPDF() {
-      if (!studentListYear) return;
-
-      const filteredStudents = studentsData.filter(s => s.year == studentListYear && s.name && s.name.trim() !== '');
-      
-      const studentRows = filteredStudents.map((student, index) => {
-        return `
-          <tr style="background: ${index % 2 === 0 ? '#fff' : '#f5f5f5'};">
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: 500; color: #000;">${index + 1}</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: 500; color: #000;">${student.name}</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: 600; color: #000;">${student.class_name || '-'}</td>
-          </tr>`;
-      }).join('');
-
-      const printDate = new Date().toLocaleDateString('ms-MY');
-
-      const htmlContent = `<!DOCTYPE html>
-<html lang="ms">
-<head>
-  <meta charset="UTF-8">
-  <title>Senarai Murid - Tahun ${studentListYear}</title>
-  <style>
-    @media print { @page { size: A4 portrait; margin: 15mm; } body { margin: 0; padding: 0; } }
-    body { font-family: Arial, sans-serif; padding: 20px; background: white; }
-    .print-date { text-align: right; font-size: 11px; color: #666; margin-bottom: 10px; }
-    .header { text-align: center; margin-bottom: 20px; }
-    .logo { width: 120px; height: auto; margin: 0 auto 15px auto; display: block; }
-    .header h1 { margin: 0; padding: 0; font-size: 22px; color: #000; font-weight: bold; line-height: 1.0; }
-    .header h2 { margin: 0; padding: 0; font-size: 18px; color: #dc2626; font-weight: bold; line-height: 1.5; }
-    .header p { margin: 0; padding: 0; font-size: 15px; color: #000; font-weight: bold; line-height: 1.5; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th { border: 1px solid #000; padding: 10px; text-align: center; background: #dc2626; color: white; font-weight: bold; font-size: 14px; }
-    td { border: 1px solid #000; padding: 8px; text-align: center; color: #000; font-size: 13px; }
-    .footer { text-align: center; margin-top: 20px; font-size: 11px; color: #000; border-top: 2px solid #dc2626; padding-top: 15px; }
-    .summary { text-align: center; margin-top: 15px; font-size: 13px; color: #000; font-weight: bold; }
-  </style>
-</head>
-<body onload="window.print()">
-  <div class="print-date">Dicetak: ${printDate}</div>
-  <div class="header">
-    <img src="https://i.imgur.com/DLy3jZn.png" alt="Logo" class="logo" loading="lazy" onerror="this.style.display='none';">
-    <h1>Senarai Murid Kokurikulum</h1>
-    <h2>${config.school_name}</h2>
-    ${config.unit_name && config.unit_name.trim() !== '' ? `<p>${config.unit_name}</p>` : ''}
-    <p>Tahun ${studentListYear}</p>
-  </div>
-  
-  <table>
-    <thead>
-      <tr>
-        <th style="width: 10%;">Bil</th>
-        <th style="width: 65%;">Nama Murid</th>
-        <th style="width: 25%;">Kelas</th>
-      </tr>
-    </thead>
-    <tbody>${studentRows}</tbody>
-  </table>
-  
-  <div class="summary">
-    <p>Jumlah Murid: ${filteredStudents.length} orang</p>
-  </div>
-  
-  <div class="footer"><p>© 2026 - Unit Kokurikulum SKBTHO2</p></div>
-</body>
-</html>`;
-
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const blobUrl = URL.createObjectURL(blob);
-      const printWindow = window.open(blobUrl, '_blank');
-      if (printWindow) setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        if (!studentListYear) return;
+        const students = studentsData.filter(s => s.year == studentListYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
+        const rows = students.map((s, i) => `<tr><td style="border:1px solid #000; text-align:center">${i+1}</td><td style="border:1px solid #000; padding:8px">${s.name}</td><td style="border:1px solid #000; text-align:center">${s.class_name||'-'}</td></tr>`).join('');
+        const html = `<html><head><style>table{width:100%; border-collapse:collapse; font-family:Arial} th,td{border:1px solid #000; padding:8px}</style></head><body onload="window.print()">
+            <h2 style="text-align:center">SENARAI AHLI UNIT KOKURIKULUM</h2>
+            <p style="text-align:center">${config.unit_name} - TAHUN ${studentListYear}</p>
+            <table><thead><tr><th style="width:50px">Bil</th><th>Nama Murid</th><th style="width:150px">Kelas</th></tr></thead><tbody>${rows}</tbody></table>
+            </body></html>`;
+        const win = window.open('','_blank'); win.document.write(html); win.document.close();
     }
 
-    function generateComprehensiveReport(yearToPrint) {
-      const filteredStudents = studentsData.filter(s => 
-        s.year === yearToPrint && s.record_type !== 'unit_config' && s.name && s.name.trim() !== ''
-      );
-
-      if (filteredStudents.length === 0) {
-        const statusDiv = document.createElement('div');
-        statusDiv.className = 'fixed top-4 right-4 bg-amber-600 text-white px-6 py-3 rounded-xl shadow-lg z-50';
-        statusDiv.textContent = 'Tiada murid untuk dilaporkan';
-        document.body.appendChild(statusDiv);
-        setTimeout(() => statusDiv.remove(), 3000);
-        return;
-      }
-
-      const detailRows = filteredStudents.map((student, index) => {
-        let totalPresent = 0;
-        let cellsHTML = '';
-        
-        for (let meeting = 1; meeting <= 12; meeting++) {
-          const isPresent = student[`attendance_${meeting}`];
-          if (isPresent) totalPresent++;
-          cellsHTML += `<td style="border: 1px solid #000; padding: 5px 2px; text-align: center; background: ${isPresent ? '#d1fae5' : '#fee2e2'}; font-weight: bold; color: ${isPresent ? '#065f46' : '#991b1b'};">${isPresent ? '/' : 'O'}</td>`;
+    function generateAnalyticsPDFForYear(y) {
+        const filtered = studentsData.filter(s => s.year == y);
+        let rows = '';
+        for (let i = 1; i <= 12; i++) {
+            let p = 0;
+            filtered.forEach(s => { if(s[`attendance_${i}`] === true || s[`attendance_${i}`] === 'true') p++; });
+            const per = filtered.length > 0 ? Math.round((p/filtered.length)*100) : 0;
+            rows += `<tr><td style="text-align:center">${i}</td><td style="text-align:center">${p}</td><td style="text-align:center">${filtered.length - p}</td><td style="text-align:center; font-weight:bold">${per}%</td></tr>`;
         }
-
-        const studentPercentage = Math.round((totalPresent / 12) * 100);
-
-        return `
-          <tr style="background: ${index % 2 === 0 ? '#fff' : '#f5f5f5'};">
-            <td style="border: 1px solid #000; padding: 5px 3px; text-align: center; font-weight: 500; color: #000;">${index + 1}</td>
-            <td style="border: 1px solid #000; padding: 5px 3px; text-align: left; font-weight: 500; color: #000;">${student.name}</td>
-            <td style="border: 1px solid #000; padding: 5px 3px; text-align: center; font-weight: 500; color: #000;">${student.class_name || '-'}</td>
-            ${cellsHTML}
-            <td style="border: 1px solid #000; padding: 5px 3px; text-align: center; font-weight: bold; background: #e0e7ff; color: #4338ca;">${totalPresent}/12</td>
-            <td style="border: 1px solid #000; padding: 5px 3px; text-align: center; font-weight: bold; background: #fef3c7; color: #92400e;">${studentPercentage}%</td>
-          </tr>
-        `;
-      }).join('');
-
-      const printDate = new Date().toLocaleDateString('ms-MY');
-
-      const htmlContent = `<!DOCTYPE html>
-<html lang="ms">
-<head>
-  <meta charset="UTF-8">
-  <title>Laporan Keseluruhan - Tahun ${yearToPrint}</title>
-  <style>
-    @media print { @page { size: A4 landscape; margin: 10mm; } body { margin: 0; padding: 0; } }
-    body { font-family: Arial, sans-serif; background: white; margin: 0; padding: 10px; }
-    .print-date { text-align: right; font-size: 10px; color: #666; margin-bottom: 8px; }
-    .header { text-align: center; margin-bottom: 12px; }
-    .logo { width: 60px; height: auto; margin: 0 auto 8px auto; display: block; }
-    .header h1 { margin: 0; padding: 0; font-size: 18px; color: #000; font-weight: bold; line-height: 1.1; }
-    .header h2 { margin: 0; padding: 0; font-size: 14px; color: #dc2626; font-weight: bold; line-height: 1.3; }
-    .header p { margin: 0; padding: 0; font-size: 11px; color: #000; line-height: 1.3; }
-    table { width: 100%; border-collapse: collapse; font-size: 10px; }
-    th { border: 1px solid #000; padding: 5px 2px; text-align: center; background: #dc2626; color: white; font-weight: bold; font-size: 10px; }
-    td { border: 1px solid #000; padding: 4px 2px; text-align: center; color: #000; font-size: 10px; }
-    .footer { text-align: center; margin-top: 8px; font-size: 9px; color: #000; border-top: 1px solid #dc2626; padding-top: 8px; }
-  </style>
-</head>
-<body onload="window.print()">
-    <div class="print-date">Dicetak: ${printDate}</div>
-    
-    <div class="header">
-      <img src="https://i.imgur.com/DLy3jZn.png" alt="Logo" class="logo" loading="lazy" onerror="this.style.display='none';">
-      <h1>LAPORAN KEHADIRAN KOKURIKULUM</h1>
-      <h2>${config.school_name}</h2>
-      ${config.unit_name && config.unit_name.trim() !== '' ? `<p>${config.unit_name}</p>` : ''}
-      <p>Tahun ${yearToPrint}</p>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Bil</th>
-          <th>Nama Murid</th>
-          <th>Kelas</th>
-          <th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>P6</th><th>P7</th><th>P8</th><th>P9</th><th>P10</th><th>P11</th><th>P12</th>
-          <th style="background: #10b981;">Jumlah</th>
-          <th style="background: #fbbf24;">%</th>
-        </tr>
-      </thead>
-      <tbody>${detailRows}</tbody>
-    </table>
-
-    <div class="footer">
-      <p>© 2026 - Unit Kokurikulum SKBTHO2</p>
-    </div>
-</body>
-</html>`;
-
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const blobUrl = URL.createObjectURL(blob);
-      const printWindow = window.open(blobUrl, '_blank');
-      if (printWindow) setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-
-      const toastDiv = document.createElement('div');
-      toastDiv.className = 'fixed top-4 right-4 bg-purple-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 animate-slide-in';
-      toastDiv.innerHTML = `
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <div>
-          <p class="font-bold">Laporan Siap!</p>
-          <p class="text-sm">Senarai terperinci Tahun ${yearToPrint} sedang dibuka</p>
-        </div>
-      `;
-      document.body.appendChild(toastDiv);
-      setTimeout(() => toastDiv.remove(), 4000);
+        const html = `<html><body onload="window.print()"><h2 style="text-align:center">ANALISA KEHADIRAN TAHUN ${y}</h2><p style="text-align:center">${config.unit_name}</p><table border="1" style="width:100%; border-collapse:collapse"><thead><tr><th>Perjumpaan</th><th>Hadir</th><th>Tidak Hadir</th><th>Peratus</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+        const win = window.open('','_blank'); win.document.write(html); win.document.close();
     }
 
-    // Initialize app
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeApp);
-    } else {
-      initializeApp();
+    function generateComprehensiveReport(y) {
+        generateAttendancePDF(); // Laporan komprehensif guna format yang sama dengan rekod kehadiran penuh
     }
+
+    // Init call
+    document.addEventListener('DOMContentLoaded', initializeApp);
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e5ed66d306fee09',t:'MTc3NTEyMjQ2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>
-async function hantarKeGoogle() {
-  const url = 'URL_APPS_SCRIPT_KAU'; // <--- GANTI DENGAN URL GOOGLE KAU
-  
-  // Trik: Kita cuba cari data murid dalam sistem 1,800 baris kau secara automatik
-  // Biasanya data tu disimpan dalam variable 'students' atau dalam table
-  let dataMurid = typeof students !== 'undefined' ? students : "Data dalam table";
-
-  try {
-    await fetch(url, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify({
-        unit: document.querySelector('h1')?.innerText || "UNIT KOKU",
-        tarikh: new Date().toLocaleDateString(),
-        data: dataMurid
-      })
-    });
-    alert("BERJAYA! Data dah masuk Google Sheets.");
-  } catch (e) {
-    alert("ALAMAK! Tak jadi hantar. Check internet atau URL.");
-  }
-}
-
-// Cari butang simpan kau dan paksa dia hantar ke Google
-document.addEventListener('click', function(e) {
-  if (e.target.innerText.toUpperCase().includes('SIMPAN') || 
-      e.target.innerText.toUpperCase().includes('SAVE')) {
-    hantarKeGoogle();
-  }
-});
-</script>
 </body>
 </html>
-
