@@ -527,7 +527,89 @@
           meetingDatesRecord = meetingDates;
           loadMeetingDates();
         }
-        
+        // --- 5. FUNGSI PENUKAR TAB (ENJIN UTAMA) ---
+function setupEventListeners() {
+    // Event Listener untuk Tab
+    document.getElementById('tab-student-list').addEventListener('click', () => switchTab('student_list'));
+    document.getElementById('tab-attendance').addEventListener('click', () => switchTab('attendance'));
+    document.getElementById('tab-analytics').addEventListener('click', () => switchTab('analytics'));
+
+    // Event Listener untuk Input Nama Unit (Auto-save ke Sheets)
+    document.getElementById('unit-input').addEventListener('change', (e) => {
+        const newName = e.target.value;
+        syncToSheet('update_unit', { unit_name: newName });
+    });
+
+    // Event Listener untuk Tarikh Perjumpaan
+    document.querySelectorAll('.date-input').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const meetingNum = e.target.getAttribute('data-date');
+            const dateValue = e.target.value;
+            syncToSheet('update_date', { meeting_num: meetingNum, date: dateValue });
+        });
+    });
+
+    // Event Listener untuk Search
+    document.getElementById('global-search-input').addEventListener('input', handleGlobalSearch);
+    
+    // Inisialisasi butang tambah murid
+    document.getElementById('add-student-list-btn').addEventListener('click', addStudent);
+}
+
+function switchTab(view) {
+    currentView = view;
+    
+    // Sembunyikan semua container
+    const views = ['view-student-list', 'view-attendance', 'view-analytics'];
+    views.forEach(v => document.getElementById(v).classList.add('hidden'));
+    
+    // Reset warna butang tab (Kembalikan ke gaya asal)
+    const tabs = {
+        'student_list': 'tab-student-list',
+        'attendance': 'tab-attendance',
+        'analytics': 'tab-analytics'
+    };
+    
+    Object.values(tabs).forEach(tabId => {
+        const btn = document.getElementById(tabId);
+        btn.classList.remove('bg-red-500', 'text-white', 'shadow-md');
+        btn.classList.add('bg-gray-100', 'text-gray-600');
+    });
+
+    // Aktifkan tab yang dipilih
+    const activeViewId = `view-${view.replace('_', '-')}`;
+    const activeTabId = tabs[view];
+    
+    document.getElementById(activeViewId).classList.remove('hidden');
+    const activeBtn = document.getElementById(activeTabId);
+    activeBtn.classList.add('bg-red-500', 'text-white', 'shadow-md');
+    activeBtn.classList.remove('bg-gray-100', 'text-gray-600');
+
+    if (view === 'analytics') updateAnalytics();
+}
+
+// --- 6. FUNGSI PEMILIHAN TAHUN ---
+function selectStudentListYear(year) {
+    studentListYear = year;
+    document.getElementById('student-list-year-selection').classList.add('hidden');
+    document.getElementById('student-list-data-view').classList.remove('hidden');
+    document.getElementById('student-list-selected-year-badge').textContent = year;
+    document.getElementById('student-list-selected-year-label').textContent = `Tahun ${year}`;
+    renderStudentListRows();
+}
+
+function selectYear(year) {
+    selectedYear = year;
+    document.getElementById('year-selection').classList.add('hidden');
+    document.getElementById('attendance-data-view').classList.remove('hidden');
+    document.getElementById('selected-year-badge').textContent = year;
+    document.getElementById('selected-year-label').textContent = `Tahun ${year}`;
+    renderStudentRows();
+}
+
+// Panggil init bila window siap loading
+window.onload = initializeApp;
+
         updateYearCounts();
         
         if (currentView === 'student_list' && studentListYear) {
@@ -622,10 +704,117 @@
         }
       }
     }
+// --- 7. FUNGSI SIMPAN NAMA UNIT (DIPERBAIKI) ---
+async function saveUnitName() {
+  const unitName = document.getElementById('unit-input').value.trim();
+  config.unit_name = unitName;
 
-    async function saveUnitName() {
-      const unitName = document.getElementById('unit-input').value.trim();
-      
+  // Baiki: Kita check kalau SCRIPT_URL belum diisi, bukannya check fungsi syncToSheet
+  if (SCRIPT_URL === "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI") {
+    showAutoSaveNotification('⚠️ Ralat Konfigurasi', 'Sila masukkan SCRIPT_URL anda', 'error');
+    return;
+  }
+
+  const payload = unitNameRecord 
+    ? { ...unitNameRecord, unit_name: unitName }
+    : { record_type: 'unit_config', unit_name: unitName, name: 'unit_config' };
+
+  const action = unitNameRecord ? 'update' : 'create';
+  
+  // Kita panggil syncToSheet terus
+  await syncToSheet(action, payload);
+  showAutoSaveNotification('✓ Nama Unit Disimpan!', `"${unitName}" tersimpan ke cloud`);
+}
+
+// --- 8. LOGIK JADUAL KEHADIRAN (TAB 2) ---
+function renderStudentRows() {
+  const tbody = document.getElementById('attendance-tbody');
+  tbody.innerHTML = '';
+  
+  // Filter murid mengikut tahun yang dipilih
+  const filtered = studentsData.filter(s => s.year == selectedYear)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  filtered.forEach((student, index) => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-indigo-50 transition-colors border-b border-indigo-100';
+    
+    let attendanceCells = '';
+    // Bina 12 kotak kehadiran
+    for (let i = 1; i <= 12; i++) {
+      const isPresent = student[`p${i}`] === true || student[`p${i}`] === 'true';
+      attendanceCells += `
+        <td class="p-2 text-center">
+          <input type="checkbox" 
+            ${isPresent ? 'checked' : ''} 
+            onchange="toggleAttendance('${student.id}', ${i}, this.checked)"
+            class="w-5 h-5 cursor-pointer accent-emerald-600 rounded">
+        </td>`;
+    }
+
+    tr.innerHTML = `
+      <td class="p-3 text-center font-bold text-indigo-900">${index + 1}</td>
+      <td class="p-3 font-semibold text-gray-800 uppercase text-sm">${student.name}</td>
+      <td class="p-3 text-center font-medium text-indigo-600">${student.class_name || '-'}</td>
+      ${attendanceCells}
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// --- 9. FUNGSI KLIK HADIR (AUTO-SYNC) ---
+async function toggleAttendance(studentId, meetingNum, isChecked) {
+  const studentIndex = studentsData.findIndex(s => s.id === studentId);
+  if (studentIndex === -1) return;
+
+  // Kemaskini data lokal segera (supaya UI laju)
+  studentsData[studentIndex][`p${meetingNum}`] = isChecked;
+
+  // Hantar ke Google Sheets
+  await syncToSheet('update', studentsData[studentIndex]);
+  
+  // Maklum balas visual kecil
+  console.log(`Updated Student ${studentId} Meeting ${meetingNum} to ${isChecked}`);
+}
+
+// --- 10. FUNGSI ANALISA (TAB 3) ---
+function updateAnalytics() {
+  const year = document.getElementById('analytics-year-selector').value;
+  const meeting = document.getElementById('meeting-selector').value;
+  
+  const filteredStudents = studentsData.filter(s => s.year == year);
+  const total = filteredStudents.length;
+  
+  let present = 0;
+  if (meeting === 'all') {
+    // Kira purata kehadiran semua 12 perjumpaan
+    let totalPresentCount = 0;
+    filteredStudents.forEach(s => {
+      for(let i=1; i<=12; i++) if(s[`p${i}`] === true || s[`p${i}`] === 'true') totalPresentCount++;
+    });
+    present = total > 0 ? Math.round(totalPresentCount / 12) : 0;
+  } else {
+    present = filteredStudents.filter(s => s[`p${meeting}`] === true || s[`p${meeting}`] === 'true').length;
+  }
+
+  const absent = total - present;
+  const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+
+  // Kemaskini UI
+  document.getElementById('total-present').textContent = present;
+  document.getElementById('total-absent').textContent = absent;
+  document.getElementById('total-students').textContent = total;
+  document.getElementById('attendance-rate').textContent = rate + '%';
+  document.getElementById('attendance-percentage').textContent = rate + '%';
+  
+  // Animasi Donut Chart
+  const circle = document.getElementById('attendance-circle');
+  const circumference = 2 * Math.PI * 40;
+  const offset = circumference - (rate / 100 * circumference);
+  circle.style.strokeDasharray = `${circumference} ${circumference}`;
+  circle.style.strokeDashoffset = offset;
+}
+
       if (syncToSheet) {
         showAutoSaveNotification('⚠️ Sistem Tidak Siap', 'Data SDK belum dimuatkan', 'error');
         return;
@@ -1989,3 +2178,4 @@
   </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f24d3b697862203',t:'MTc3NzE5ODUzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
