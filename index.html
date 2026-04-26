@@ -22,12 +22,13 @@
       <button id="tab-student-list" type="button" class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-red-500 text-white shadow-md">
        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a. 0z" />
-       </svg> Senarai Murid </button> <button id="tab-attendance" type="button" class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
+       </svg> Senarai Murid </button> <button id="attendance-tab-btn" onclick="switchTab('attendance')" class="..."> Kehadiran </button>  class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-       </svg> Pengisian Kehadiran </button> <button id="tab-analytics" type="button" class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
+       </svg> Pengisian Kehadiran </button> <button id="analytics-tab-btn" onclick="switchTab('analytics')" class="..."> Analisa </button> class="flex-1 min-w-[180px] px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-100 text-gray-600 hover:bg-gray-200">
        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+<div id="attendance-tab-content" class=""> </div> <div id="analytics-tab-content" class="hidden"> </div> 
        </svg> Analisa Kehadiran </button> <a href="https://skbtho2official.my.canva.site/cocotracksktho22026" target="_blank" rel="noopener noreferrer" type="button" class="px-5 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:from-indigo-700 hover:to-purple-700">
        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -587,6 +588,38 @@ function switchTab(view) {
 
     if (view === 'analytics') updateAnalytics();
 }
+function switchTab(tabId) {
+  // 1. Senarai semua ID kandungan tab dan butang tab
+  const tabs = ['attendance', 'analytics', 'students'];
+  
+  tabs.forEach(id => {
+    const contentEl = document.getElementById(`${id}-tab-content`);
+    const btnEl = document.getElementById(`${id}-tab-btn`);
+    
+    if (contentEl && btnEl) {
+      if (id === tabId) {
+        // Tunjukkan kandungan yang dipilih
+        contentEl.classList.remove('hidden');
+        // Tukar gaya butang aktif (Indigo)
+        btnEl.className = 'px-6 py-3 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2 transition-all';
+      } else {
+        // Sembunyikan kandungan lain
+        contentEl.classList.add('hidden');
+        // Tukar gaya butang tidak aktif (Kelabu)
+        btnEl.className = 'px-6 py-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-indigo-600 hover:border-indigo-300 flex items-center gap-2 transition-all';
+      }
+    }
+  });
+
+  // 2. Jalankan fungsi render mengikut tab yang dipilih
+  if (tabId === 'attendance') {
+    renderStudentRows();
+  } else if (tabId === 'analytics') {
+    updateAnalytics();
+  } else if (tabId === 'students') {
+    renderStudentListRows(); // Jika anda ada fungsi ini untuk tab senarai murid
+  }
+}
 
 // --- 6. FUNGSI PEMILIHAN TAHUN ---
 function selectStudentListYear(year) {
@@ -1018,7 +1051,7 @@ function updateAnalytics() {
         
         meetingDatesRecord[`meeting_date_${meetingNum}`] = dateValue;
         
-        const result = await syncToSheet (‘create, meetingDatesRecord);
+        const result = await syncToSheet (" create" , meetingDatesRecord);
         if (result.isOk) {
           showAutoSaveNotification('Tarikh Tersimpan! ✓', `Perjumpaan ${meetingNum} - ${new Date(dateValue).toLocaleDateString('ms-MY')}`);
         }
@@ -1292,7 +1325,7 @@ function updateAnalytics() {
         };
 
         if (syncToSheet) {
-          const result = await syncToSheet (‘create, newStudent);
+          const result = await syncToSheet (" create, newStudent);
           if (result.isOk) {
             successCount++;
           }
@@ -1323,13 +1356,19 @@ function updateAnalytics() {
     }
 
     function selectYear(year) {
-      selectedYear = year;
-      document.getElementById('year-selection').classList.add('hidden');
-      document.getElementById('attendance-data-view').classList.remove('hidden');
-      document.getElementById('selected-year-badge').textContent = year;
-      document.getElementById('selected-year-label').textContent = 'Tahun ' + year;
-      renderStudentRows();
-    }
+  selectedYear = year; // Simpan tahun yang dipilih
+  
+  // Tukar paparan skrin
+  document.getElementById('year-selection').classList.add('hidden');
+  document.getElementById('attendance-data-view').classList.remove('hidden');
+  
+  // Kemaskini label pada UI
+  document.getElementById('selected-year-badge').textContent = year;
+  document.getElementById('selected-year-label').textContent = 'Tahun ' + year;
+  
+  // AUTOMATIK: Buka tab kehadiran selepas pilih tahun
+  switchTab('attendance'); 
+}
 
     function backToYearSelection() {
       selectedYear = null;
