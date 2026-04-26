@@ -60,9 +60,17 @@
         </div>
         
         <div id="attendance-table-container" class="overflow-x-auto p-2">
-           function renderStudentRows() {
-    const container = document.getElementById('attendance-table-container');
-    const yearLabel = document.getElementById('attendance-year-label');
+<div id="attendance-tab-content" class="hidden p-4 fade-in">
+    <div class="bg-white rounded-2xl shadow-lg border border-indigo-100 overflow-hidden">
+        <div class="p-4 bg-indigo-50 border-b border-indigo-100 flex justify-between items-center">
+            <h3 class="font-bold text-indigo-900">Jadual Kehadiran: Tahun <span id="attendance-year-label">-</span></h3>
+        </div>
+        
+        <div id="attendance-table-container" class="overflow-x-auto p-2">
+        </div>
+    </div>
+</div>
+
     
     if (!container) return;
     if (!selectedYear) {
@@ -2369,7 +2377,59 @@ Sheet');
     // Initialize app when DOM is ready
     document.addEventListener('DOMContentLoaded', initializeApp);
   </script>
- <script>function switchTab(tabId) {
+ <script>
+// Pastikan kod ni dalam ni!
+function renderStudentRows() {
+    const container = document.getElementById('attendance-table-container');
+    const yearLabel = document.getElementById('attendance-year-label');
+    
+    if (!container) return;
+    if (!selectedYear) {
+        container.innerHTML = '<div class="p-10 text-center text-gray-500">Sila pilih tahun di menu utama.</div>';
+        return;
+    }
+
+    if (yearLabel) yearLabel.textContent = selectedYear;
+
+    const filtered = studentsData.filter(s => s.year == selectedYear && s.record_type !== 'unit_config');
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-10 text-center text-gray-500">Tiada murid untuk Tahun ${selectedYear}.</div>`;
+        return;
+    }
+
+    let tableHtml = `
+        <table class="w-full border-collapse">
+            <thead>
+                <tr class="bg-indigo-600 text-white text-xs">
+                    <th class="p-2 border border-indigo-500 min-w-[150px]">Nama Murid</th>
+                    ${Array.from({length: 12}, (_, i) => `<th class="p-2 border border-indigo-500 text-center">P${i+1}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    filtered.forEach(student => {
+        tableHtml += `<tr class="hover:bg-indigo-50 transition-colors border-b">
+            <td class="p-2 font-medium text-gray-800 text-sm border-r">${student.name}</td>`;
+        
+        for (let i = 1; i <= 12; i++) {
+            const isChecked = student[`attendance_${i}`] ? 'checked' : '';
+            tableHtml += `
+                <td class="p-2 text-center border-r">
+                    <input type="checkbox" ${isChecked} 
+                        class="w-5 h-5 cursor-pointer accent-indigo-600"
+                        onchange="toggleAttendance('${student.id}', ${i}, this.checked)">
+                </td>`;
+        }
+        tableHtml += '</tr>';
+    });
+
+    tableHtml += '</tbody></table>';
+    container.innerHTML = tableHtml;
+}
+</script>
+function switchTab(tabId) {
   // 1. Kenal pasti semua content view
   const views = {
     students: document.getElementById('view-student-list'),
