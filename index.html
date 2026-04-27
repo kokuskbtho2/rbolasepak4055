@@ -69,9 +69,9 @@
           <div class="absolute right-2 flex items-center gap-2">
             <select id="global-search-year-filter" class="bg-slate-100 border-none rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-200 h-10">
               <option value="all">Semua</option>
-              <option value="4">Thn 4</option>
-              <option value="5">Thn 5</option>
-              <option value="6">Thn 6</option>
+              <option value="4">Tahun 4</option>
+              <option value="5">Tahun 5</option>
+              <option value="6">Tahun 6</option>
             </select>
             <button id="global-search-clear" class="hidden w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
           </div>
@@ -84,7 +84,7 @@
       <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-8 text-left">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div class="flex-1">
-            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Nama Unit/Kelab</label>
+            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Nama Unit/Kelab/Sukan</label>
             <input type="text" id="unit-input" placeholder="Masukkan nama unit (Cth: PENGAKAP)" class="w-full text-2xl font-black text-indigo-950 border-none p-0 focus:ring-0 placeholder:text-slate-200 uppercase tracking-tight">
           </div>
           <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
@@ -139,7 +139,7 @@
                         <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase w-20">Bil</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase">Nama Murid</th>
                         <th class="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase w-40">Kelas</th>
-                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase w-32">Aksi</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase w-32">Tindakan</th>
                     </tr>
                 </thead>
                 <tbody id="student-list-body" class="divide-y divide-slate-100"></tbody>
@@ -197,7 +197,7 @@
       <div id="view-analytics" class="view-container hidden">
         <div class="bg-white rounded-3xl p-8 border border-slate-100 text-left space-y-8">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div><h2 class="text-3xl font-black text-indigo-950 uppercase tracking-tighter">Analisa</h2><p class="text-slate-500 font-medium">Statistik Kehadiran 2026</p></div>
+                <div><h2 class="text-3xl font-black text-indigo-950 uppercase tracking-tighter">Analisa</h2><p class="text-slate-500 font-medium">Statistik Kehadiran Murid 2026</p></div>
                 <div class="flex gap-3">
                     <select id="analytics-year-selector" onchange="updateAnalytics()" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 font-bold outline-none"><option value="4">Tahun 4</option><option value="5">Tahun 5</option><option value="6">Tahun 6</option></select>
                     <select id="meeting-selector" onchange="updateAnalytics()" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 font-bold outline-none"><option value="all">Semua</option><script>for(let i=1;i<=12;i++){document.write(`<option value="${i}">P${i}</option>`)}</script></select>
@@ -505,9 +505,26 @@ async function loadData() {
 
     async function saveUnitName(val) { await syncToSheet('update', { record_type: 'unit_config', unit_name: val.toUpperCase() }); showAutoSaveNotification('Sistem', 'Nama unit dikemaskini'); }
 
-    async function saveMeetingDate(num, val) { meetingDatesRecord[`meeting_date_${num}`] = val; await syncToSheet('update', meetingDatesRecord); showAutoSaveNotification('Tarikh', `P${num} dikemaskini`); }
+      async function saveMeetingDate(num, val) {
+    // Simpan tarikh ke dalam kolom attendance_1, attendance_2, dsb.
+    meetingDatesRecord[`attendance_${num}`] = val; 
+    
+    await syncToSheet('update', meetingDatesRecord);
+    showAutoSaveNotification('Tarikh', `Perjumpaan ${num} telah dikemaskini`);
+}
 
-    function loadMeetingDatesUI() { for (let i = 1; i <= 12; i++) { const input = document.querySelector(`.date-input[data-date="${i}"]`); if (input && meetingDatesRecord[`meeting_date_${i}`]) input.value = meetingDatesRecord[`meeting_date_${i}`]; } }
+ function loadMeetingDatesUI() {
+    for (let i = 1; i <= 12; i++) {
+        const input = document.querySelector(`.date-input[data-date="${i}"]`);
+        if (input) {
+            // Ia akan cari data dalam meetingDatesRecord['attendance_1'], dll.
+            const dateVal = meetingDatesRecord[`attendance_${i}`]; 
+            if (dateVal) {
+                input.value = dateVal;
+            }
+        }
+    }
+}
 
     function updateYearCounts() { [4, 5, 6].forEach(y => { const count = studentsData.filter(s => s.year == y).length; if(document.getElementById(`year${y}-count`)) document.getElementById(`year${y}-count`).textContent = count + ' murid'; if(document.getElementById(`student-list-year${y}-count`)) document.getElementById(`student-list-year${y}-count`).textContent = count + ' murid'; }); }
 
