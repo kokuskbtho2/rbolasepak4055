@@ -381,41 +381,34 @@ console.log("Rekod Tarikh Ditemui:", meetingDatesRecord); // Untuk semakan di Co
         lucide.createIcons();
     }
 
-async function addStudentFromList() {
-    const name = document.getElementById('student-list-name-input').value.trim().toUpperCase();
-    const cls = document.getElementById('student-list-class-input').value.trim().toUpperCase();
-    if (!name || !studentListYear) return;
-    const data = { name, year: studentListYear, class_name: cls, record_type: 'student' };
-    for(let i=1; i<=12; i++) data[`attendance_${i}`] = false;
-    
-    await syncToSheet('create', data, document.getElementById('add-student-list-btn'));
-    
-    // TAMBAH BARIS INI:
-    showAutoSaveNotification('Berjaya', `${name} telah ditambah.`);
-    
-    document.getElementById('student-list-name-input').value = '';
-    document.getElementById('student-list-class-input').value = '';
-}
+    async function addStudentFromList() {
+        const name = document.getElementById('student-list-name-input').value.trim().toUpperCase();
+        const cls = document.getElementById('student-list-class-input').value.trim().toUpperCase();
+        if (!name || !studentListYear) return;
+        const data = { name, year: studentListYear, class_name: cls, record_type: 'student' };
+        for(let i=1; i<=12; i++) data[`attendance_${i}`] = false;
+        await syncToSheet('create', data, document.getElementById('add-student-list-btn'));
+        document.getElementById('student-list-name-input').value = '';
+        document.getElementById('student-list-class-input').value = '';
+    }
 
     function openBulkUploadModal() { document.getElementById('bulk-upload-student-list-modal').classList.remove('hidden'); }
     function closeBulkUploadStudentListModal() { document.getElementById('bulk-upload-student-list-modal').classList.add('hidden'); }
     
-  async function processBulkUpload() {
-    const text = document.getElementById('bulk-student-list-names-input').value.trim();
-    if (!text) return;
-    toggleLoader(true);
-    const lines = text.split('\n').filter(l => l.trim());
-    for (const line of lines) {
-        // ... (kod asal anda) ...
-        await syncToSheet('create', data);
-    }
-    closeBulkUploadStudentListModal();
-    document.getElementById('bulk-student-list-names-input').value = '';
-    toggleLoader(false);
-    
-    // TAMBAH BARIS INI:
-    showAutoSaveNotification('Pukal Selesai', `${lines.length} murid telah dimasukkan.`);
-}
+    async function processBulkUpload() {
+        const text = document.getElementById('bulk-student-list-names-input').value.trim();
+        if (!text) return;
+        toggleLoader(true);
+        const lines = text.split('\n').filter(l => l.trim());
+        for (const line of lines) {
+            let name = '', cls = '';
+            if (line.includes('|')) { [name, cls] = line.split('|').map(x => x.trim().toUpperCase()); }
+            else { name = line.trim().toUpperCase(); }
+            if(!name) continue;
+            const data = { name, year: studentListYear, class_name: cls, record_type: 'student' };
+            for(let i=1; i<=12; i++) data[`attendance_${i}`] = false;
+            await syncToSheet('create', data);
+        }
         closeBulkUploadStudentListModal();
         document.getElementById('bulk-student-list-names-input').value = '';
         toggleLoader(false);
@@ -554,18 +547,7 @@ function loadMeetingDatesUI() {
 
     function openDeleteModalManual(name) { studentToDelete = studentsData.find(s => s.name === name && s.year == studentListYear); document.getElementById('delete-student-name').textContent = `"${name}"`; document.getElementById('delete-modal').classList.remove('hidden'); }
     function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); document.getElementById('delete-pin-input').value = ''; }
-async function confirmDelete() {
-    if (document.getElementById('delete-pin-input').value !== PIN) { 
-        alert("PIN SALAH!"); 
-        return; 
-    }
-    const deletedName = studentToDelete.name; // Ambil nama sebelum padam
-    await syncToSheet('delete', studentToDelete);
-    closeDeleteModal();
-    
-    // TAMBAH BARIS INI:
-    showAutoSaveNotification('Dipadam', `${deletedName} telah dikeluarkan.`);
-}
+    async function confirmDelete() { if (document.getElementById('delete-pin-input').value !== PIN) { alert("PIN SALAH!"); return; } await syncToSheet('delete', studentToDelete); closeDeleteModal(); }
 
     function openDeleteAllModal() { document.getElementById('delete-all-year').textContent = studentListYear; document.getElementById('delete-all-modal').classList.remove('hidden'); }
     function closeDeleteAllModal() { document.getElementById('delete-all-modal').classList.add('hidden'); document.getElementById('delete-all-pin-input').value = ''; }
