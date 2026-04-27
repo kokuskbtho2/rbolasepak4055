@@ -3,48 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kehadiran Kokurikulum</title>
+    <title>Sistem Kehadiran Kokurikulum SKBTHO2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .view-container { display: none; }
         .view-container.active { display: block; }
-        .sticky-col-name { position: sticky; left: 0; background: white; z-index: 10; border-right: 2px solid #e2e8f0; }
+        .sticky-col-name { position: sticky; left: 0; background: white; z-index: 10; border-right: 2px solid #f1f5f9; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
-    <header class="bg-indigo-950 text-white p-6 shadow-xl">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<body class="bg-slate-50 min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        
+        <header class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 pb-6 border-b border-slate-200">
             <div class="flex items-center gap-4">
-                <div class="bg-indigo-600 p-3 rounded-xl">
-                    <i data-lucide="award" class="w-8 h-8 text-white"></i>
+                <div class="w-16 h-16 bg-red-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-red-200 rotate-3">
+                    <i data-lucide="award" class="text-white w-10 h-10"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-extrabold tracking-tight">KOKU<span class="text-indigo-400">HUB</span></h1>
-                    <p class="text-indigo-300 text-xs font-bold uppercase tracking-widest">SK Bandar Tun Hussein Onn 2</p>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tighter leading-none">KOKU<span class="text-red-600">HUB</span></h1>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-2">SK Bandar Tun Hussein Onn 2</p>
                 </div>
             </div>
-
+            
             <div class="relative w-full md:w-96">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-300 w-5 h-5"></i>
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
                 <input type="text" id="global-search-input" placeholder="Cari nama murid..." 
-                       class="w-full bg-indigo-900/50 border border-indigo-800 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder-indigo-400 outline-none focus:ring-2 focus:ring-indigo-500">
-                <div id="global-search-results" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden z-50 text-slate-800">
-                    <div id="search-results-content" class="max-h-60 overflow-y-auto"></div>
+                       class="w-full bg-white border-2 border-slate-100 rounded-2xl py-3 pl-12 pr-4 font-bold text-slate-700 shadow-sm focus:border-red-500 transition-all outline-none">
+                <div id="global-search-results" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50">
+                    <div id="search-results-content" class="max-h-64 overflow-y-auto"></div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <div class="max-w-7xl mx-auto p-4 md:p-8">
-        <nav class="flex flex-wrap gap-2 mb-8 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
-            <button id="tab-student-list" onclick="switchTab('student-list')" class="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm transition-all bg-indigo-600 text-white shadow-lg">AHLI UNIT</button>
-            <button id="tab-attendance" onclick="switchTab('attendance')" class="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm transition-all text-slate-600 hover:bg-slate-100">KEHADIRAN</button>
-            <button id="tab-analytics" onclick="switchTab('analytics')" class="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm transition-all text-slate-600 hover:bg-slate-100">ANALISA</button>
-            <div class="ml-auto flex items-center gap-2 px-4 border-l border-slate-100">
-                <i data-lucide="layers" class="w-4 h-4 text-indigo-500"></i>
+        <nav class="flex flex-col lg:flex-row items-center justify-between gap-4 mb-10 bg-white p-3 rounded-[2.5rem] shadow-sm border border-slate-100">
+            <div class="flex flex-wrap justify-center gap-2">
+                <button id="tab-student-list" onclick="switchTab('student-list')" class="px-8 py-4 rounded-[1.8rem] font-black text-sm transition-all bg-red-500 text-white shadow-lg shadow-red-100">AHLI UNIT</button>
+                <button id="tab-attendance" onclick="switchTab('attendance')" class="px-8 py-4 rounded-[1.8rem] font-black text-sm transition-all text-slate-600 hover:bg-slate-100">KEHADIRAN</button>
+                <button id="tab-analytics" onclick="switchTab('analytics')" class="px-8 py-4 rounded-[1.8rem] font-black text-sm transition-all text-slate-600 hover:bg-slate-100">ANALISA</button>
+            </div>
+            <div class="px-6 py-2 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
+                <i data-lucide="layers" class="w-4 h-4 text-red-500"></i>
                 <input type="text" id="unit-input" onchange="saveUnitName()" placeholder="Nama Unit..." class="bg-transparent border-none font-bold text-slate-700 focus:ring-0 text-sm outline-none uppercase">
             </div>
         </nav>
@@ -52,51 +53,41 @@
         <main>
             <div id="view-student-list" class="view-container active">
                 <div id="student-list-year-selection" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <button onclick="selectStudentListYear(4)" class="bg-white p-8 rounded-3xl border-2 border-transparent hover:border-indigo-500 shadow-sm hover:shadow-xl transition-all text-center">
-                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl font-black">4</div>
-                        <h3 class="text-xl font-bold text-slate-800">Tahun 4</h3>
-                        <p id="student-list-year4-count" class="text-slate-400 font-medium text-sm">0 murid</p>
+                    <button onclick="selectStudentListYear(4)" class="bg-white p-8 rounded-[2rem] border-2 border-slate-50 hover:border-red-500 transition-all text-left">
+                        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-6"><span class="text-2xl font-black text-red-600">4</span></div>
+                        <h3 class="text-xl font-black text-slate-900">Tahun 4</h3>
+                        <p id="student-list-year4-count" class="text-slate-400 font-bold text-sm">0 murid</p>
                     </button>
-                    <button onclick="selectStudentListYear(5)" class="bg-white p-8 rounded-3xl border-2 border-transparent hover:border-indigo-500 shadow-sm hover:shadow-xl transition-all text-center">
-                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl font-black">5</div>
-                        <h3 class="text-xl font-bold text-slate-800">Tahun 5</h3>
-                        <p id="student-list-year5-count" class="text-slate-400 font-medium text-sm">0 murid</p>
+                    <button onclick="selectStudentListYear(5)" class="bg-white p-8 rounded-[2rem] border-2 border-slate-50 hover:border-red-500 transition-all text-left">
+                        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-6"><span class="text-2xl font-black text-red-600">5</span></div>
+                        <h3 class="text-xl font-black text-slate-900">Tahun 5</h3>
+                        <p id="student-list-year5-count" class="text-slate-400 font-bold text-sm">0 murid</p>
                     </button>
-                    <button onclick="selectStudentListYear(6)" class="bg-white p-8 rounded-3xl border-2 border-transparent hover:border-indigo-500 shadow-sm hover:shadow-xl transition-all text-center">
-                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl font-black">6</div>
-                        <h3 class="text-xl font-bold text-slate-800">Tahun 6</h3>
-                        <p id="student-list-year6-count" class="text-slate-400 font-medium text-sm">0 murid</p>
+                    <button onclick="selectStudentListYear(6)" class="bg-white p-8 rounded-[2rem] border-2 border-slate-50 hover:border-red-500 transition-all text-left">
+                        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-6"><span class="text-2xl font-black text-red-600">6</span></div>
+                        <h3 class="text-xl font-black text-slate-900">Tahun 6</h3>
+                        <p id="student-list-year6-count" class="text-slate-400 font-bold text-sm">0 murid</p>
                     </button>
                 </div>
 
                 <div id="student-list-data-view" class="hidden space-y-6">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                        <button onclick="backToStudentListYearSelection()" class="flex items-center gap-2 font-bold text-slate-500 hover:text-indigo-600 transition-colors">
-                            <i data-lucide="chevron-left"></i> Kembali ke Pilihan Tahun
-                        </button>
+                    <div class="flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-100">
+                        <button onclick="backToStudentListYearSelection()" class="p-3 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
                         <div class="flex gap-2">
-                            <button id="bulk-upload-student-list-btn" class="bg-slate-200 px-4 py-2 rounded-xl font-bold text-sm">Pukal</button>
-                            <button id="print-student-list-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg">Cetak Ahli</button>
-                            <button id="delete-all-student-list-btn" class="bg-rose-50 text-rose-600 px-4 py-2 rounded-xl font-bold text-sm">Kosongkan</button>
+                            <button id="print-student-list-btn" onclick="generateStudentListPDF()" class="px-5 py-3 bg-indigo-600 text-white rounded-2xl font-black text-sm flex items-center gap-2">Cetak Ahli</button>
                         </div>
                     </div>
-                    
-                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="p-6 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-4">
-                            <input type="text" id="student-list-name-input" placeholder="Nama Murid Baru..." class="flex-1 px-4 py-2 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500">
-                            <input type="text" id="student-list-class-input" placeholder="Kelas" class="w-24 px-4 py-2 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500">
-                            <button id="add-student-list-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold">Tambah</button>
+                    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                        <div class="p-6 border-b border-slate-50 flex items-center gap-3">
+                            <input type="text" id="student-list-name-input" placeholder="Nama Murid..." class="flex-1 bg-slate-50 border-none rounded-xl py-3 px-4 font-bold text-slate-700">
+                            <input type="text" id="student-list-class-input" placeholder="Kelas" class="w-32 bg-slate-50 border-none rounded-xl py-3 px-4 font-bold text-slate-700">
+                            <button id="add-student-list-btn" onclick="addStudentFromList()" class="bg-red-500 text-white p-3 rounded-xl shadow-lg"><i data-lucide="plus"></i></button>
                         </div>
-                        <table class="w-full">
-                            <thead class="bg-slate-100 text-slate-500 text-xs uppercase font-bold">
-                                <tr>
-                                    <th class="px-6 py-4 text-left">Bil</th>
-                                    <th class="px-6 py-4 text-left">Nama</th>
-                                    <th class="px-6 py-4 text-center">Kelas</th>
-                                    <th class="px-6 py-4 text-center">Tindakan</th>
-                                </tr>
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <tr><th class="px-6 py-4">Bil</th><th class="px-6 py-4">Nama</th><th class="px-6 py-4 text-center">Kelas</th><th class="px-6 py-4 text-center">Aksi</th></tr>
                             </thead>
-                            <tbody id="student-list-body" class="divide-y divide-slate-100"></tbody>
+                            <tbody id="student-list-body" class="divide-y divide-slate-50 font-medium"></tbody>
                         </table>
                     </div>
                 </div>
@@ -104,91 +95,51 @@
 
             <div id="view-attendance" class="view-container">
                 <div id="year-selection" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <button onclick="selectYear(4)" class="bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all text-center">
-                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl font-black">4</div>
-                        <h3 class="text-xl font-bold text-slate-800">Tahun 4</h3>
-                        <p id="year4-count" class="text-slate-400 font-medium">0 murid</p>
+                    <button onclick="selectYear(4)" class="bg-white p-8 rounded-[2rem] border-2 border-slate-50 hover:border-red-500 transition-all text-left">
+                        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-6"><span class="text-2xl font-black text-red-600">4</span></div>
+                        <h3 class="text-xl font-black text-slate-900">Tahun 4</h3>
                     </button>
-                    <button onclick="selectYear(5)" class="bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all text-center">
-                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl font-black">5</div>
-                        <h3 class="text-xl font-bold text-slate-800">Tahun 5</h3>
-                        <p id="year5-count" class="text-slate-400 font-medium">0 murid</p>
-                    </button>
-                    <button onclick="selectYear(6)" class="bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all text-center">
-                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl font-black">6</div>
-                        <h3 class="text-xl font-bold text-slate-800">Tahun 6</h3>
-                        <p id="year6-count" class="text-slate-400 font-medium">0 murid</p>
-                    </button>
-                </div>
+                    </div>
 
                 <div id="attendance-data-view" class="hidden space-y-6">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                    <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
                             <script>
                                 for(let i=1; i<=12; i++) {
-                                    document.write(`<div class="space-y-1"><label class="text-[10px] font-bold text-slate-400 uppercase">P${i}</label><input type="date" class="date-input w-full bg-slate-50 border border-slate-200 rounded-lg text-xs p-2" data-date="${i}"></div>`);
+                                    document.write(`<div class="space-y-1"><label class="text-[9px] font-black text-slate-400 uppercase">P${i}</label><input type="date" class="date-input w-full bg-slate-50 border-none rounded-xl text-[10px] font-bold p-2" data-date="${i}"></div>`);
                                 }
                             </script>
                         </div>
                     </div>
-
-                    <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm">
-                        <button onclick="backToYearSelection()" class="text-slate-500 font-bold flex items-center gap-2 hover:text-indigo-600"><i data-lucide="arrow-left"></i> Kembali</button>
-                        <h2 class="text-xl font-extrabold text-slate-800">KEHADIRAN TAHUN <span id="selected-year-badge">4</span></h2>
-                        <button id="download-pdf-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg flex items-center gap-2"><i data-lucide="printer"></i> Cetak PDF</button>
+                    <div class="flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-100">
+                        <button onclick="backToYearSelection()" class="p-3 bg-slate-100 rounded-xl"><i data-lucide="arrow-left"></i></button>
+                        <button id="download-pdf-btn" onclick="generateAttendancePDF()" class="px-6 py-3 bg-red-500 text-white rounded-2xl font-black text-sm flex items-center gap-2 shadow-lg shadow-red-100"><i data-lucide="file-text"></i> Cetak PDF</button>
                     </div>
-
-                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
-                                <thead class="bg-slate-100 text-slate-500 font-bold uppercase text-[10px]">
-                                    <tr>
-                                        <th class="px-4 py-4 text-left">Bil</th>
-                                        <th class="px-4 py-4 text-left sticky-col-name">Nama Murid</th>
-                                        <th class="px-4 py-4 text-center">Kelas</th>
-                                        <script>for(let i=1;i<=12;i++) document.write(`<th class="px-2 py-4 text-center">P${i}</th>`);</script>
-                                        <th class="px-4 py-4 text-center bg-indigo-50 text-indigo-600">Jum</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="attendance-body" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
+                    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                <tr>
+                                    <th class="px-4 py-4">Bil</th><th class="px-4 py-4 sticky-col-name">Nama Murid</th><th class="px-4 py-4 text-center">Kelas</th>
+                                    <script>for(let i=1;i<=12;i++) document.write(`<th class="px-2 py-4 text-center">P${i}</th>`);</script>
+                                    <th class="px-4 py-4 text-center bg-indigo-50 text-indigo-600">Jum</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendance-body" class="divide-y divide-slate-50 font-medium text-sm"></tbody>
+                        </table>
                     </div>
-                </div>
-            </div>
-
-            <div id="view-analytics" class="view-container">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200"><p class="text-xs font-bold text-slate-400 uppercase mb-1">Hadir</p><p id="total-present" class="text-3xl font-black text-emerald-500">0</p></div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200"><p class="text-xs font-bold text-slate-400 uppercase mb-1">Tidak Hadir</p><p id="total-absent" class="text-3xl font-black text-rose-500">0</p></div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200"><p class="text-xs font-bold text-slate-400 uppercase mb-1">Jumlah Ahli</p><p id="total-students" class="text-3xl font-black text-indigo-600">0</p></div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200"><p class="text-xs font-bold text-slate-400 uppercase mb-1">Purata</p><p id="attendance-rate" class="text-3xl font-black text-indigo-900">0%</p></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl w-full max-w-sm p-8 text-center shadow-2xl">
-            <h2 id="delete-student-name" class="text-xl font-bold mb-6">Padam Murid?</h2>
-            <input type="password" id="delete-pin-input" placeholder="Masukkan PIN" class="w-full bg-slate-100 border-none rounded-xl py-3 text-center mb-6">
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('delete-modal').classList.add('hidden')" class="flex-1 py-3 font-bold text-slate-400">Batal</button>
-                <button id="confirm-delete" class="flex-1 bg-rose-500 text-white py-3 rounded-xl font-bold">Padam</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzQ7R7V78v0fE37Lp5C7_4P4y2C_7G_p6H3m0G8C_Kz7C1g6x8/exec';
-        const PIN = '1234'; 
         let studentsData = [];
         let config = { unit_name: '' };
         let meetingDatesRecord = null;
         let selectedYear = null;
         let studentListYear = null;
 
-        // FUNGSI UTAMA
         async function refreshData() {
             try {
                 const res = await fetch(`${SHEET_URL}?t=${Date.now()}`);
@@ -202,16 +153,11 @@
                 updateYearCounts();
                 if (studentListYear) renderStudentListRows();
                 if (selectedYear) renderStudentRows();
-                updateAnalytics();
             } catch (e) { console.error(e); }
         }
 
         async function syncToSheet(action, payload) {
-            await fetch(SHEET_URL, {
-                method: 'POST', mode: 'no-cors', cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, ...payload })
-            });
+            await fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action, ...payload }) });
             await refreshData();
         }
 
@@ -222,101 +168,44 @@
             const btns = ['tab-student-list', 'tab-attendance', 'tab-analytics'];
             btns.forEach(id => {
                 const b = document.getElementById(id);
-                b.className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm transition-all text-slate-600 hover:bg-slate-100";
+                b.className = "px-8 py-4 rounded-[1.8rem] font-black text-sm transition-all text-slate-600 hover:bg-slate-100";
             });
-            document.getElementById(`tab-${tab}`).className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-sm transition-all bg-indigo-600 text-white shadow-lg";
+            document.getElementById(`tab-${tab}`).className = "px-8 py-4 rounded-[1.8rem] font-black text-sm transition-all bg-red-500 text-white shadow-lg shadow-red-100";
         }
 
         function updateYearCounts() {
             [4, 5, 6].forEach(y => {
                 const count = studentsData.filter(s => s.year == y).length + ' murid';
-                if(document.getElementById(`year${y}-count`)) document.getElementById(`year${y}-count`).textContent = count;
                 if(document.getElementById(`student-list-year${y}-count`)) document.getElementById(`student-list-year${y}-count`).textContent = count;
             });
         }
 
-        // --- STUDENT LIST LOGIC ---
-        function selectStudentListYear(y) {
-            studentListYear = y;
-            document.getElementById('student-list-year-selection').classList.add('hidden');
-            document.getElementById('student-list-data-view').classList.remove('hidden');
-            renderStudentListRows();
-        }
-        function backToStudentListYearSelection() {
-            studentListYear = null;
-            document.getElementById('student-list-year-selection').classList.remove('hidden');
-            document.getElementById('student-list-data-view').classList.add('hidden');
-        }
+        function selectStudentListYear(y) { studentListYear = y; document.getElementById('student-list-year-selection').classList.add('hidden'); document.getElementById('student-list-data-view').classList.remove('hidden'); renderStudentListRows(); }
+        function backToStudentListYearSelection() { studentListYear = null; document.getElementById('student-list-year-selection').classList.remove('hidden'); document.getElementById('student-list-data-view').classList.add('hidden'); }
         function renderStudentListRows() {
-            const tbody = document.getElementById('student-list-body');
-            tbody.innerHTML = '';
+            const tbody = document.getElementById('student-list-body'); tbody.innerHTML = '';
             const filtered = studentsData.filter(s => s.year == studentListYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
             filtered.forEach((s, i) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="px-6 py-4 font-bold text-slate-400">${i+1}</td><td class="px-6 py-4 font-bold">${s.name}</td><td class="px-6 py-4 text-center font-bold text-indigo-600">${s.class_name||'-'}</td><td class="px-6 py-4 text-center"><button onclick="openDeleteModalManual('${s.name}')" class="text-rose-500 hover:bg-rose-50 p-2 rounded-lg">Padam</button></td>`;
-                tbody.appendChild(tr);
+                tbody.innerHTML += `<tr><td class="px-6 py-4 font-bold text-slate-400">${i+1}</td><td class="px-6 py-4 font-black text-slate-900">${s.name}</td><td class="px-6 py-4 text-center font-bold text-indigo-600">${s.class_name||'-'}</td><td class="px-6 py-4 text-center">Padam</td></tr>`;
             });
         }
 
-        // --- ATTENDANCE LOGIC ---
-        function selectYear(y) {
-            selectedYear = y;
-            document.getElementById('year-selection').classList.add('hidden');
-            document.getElementById('attendance-data-view').classList.remove('hidden');
-            document.getElementById('selected-year-badge').textContent = y;
-            renderStudentRows();
-        }
-        function backToYearSelection() {
-            selectedYear = null;
-            document.getElementById('year-selection').classList.remove('hidden');
-            document.getElementById('attendance-data-view').classList.add('hidden');
-        }
+        function selectYear(y) { selectedYear = y; document.getElementById('year-selection').classList.add('hidden'); document.getElementById('attendance-data-view').classList.remove('hidden'); renderStudentRows(); }
+        function backToYearSelection() { selectedYear = null; document.getElementById('year-selection').classList.remove('hidden'); document.getElementById('attendance-data-view').classList.add('hidden'); }
         function renderStudentRows() {
-            const tbody = document.getElementById('attendance-body');
-            tbody.innerHTML = '';
+            const tbody = document.getElementById('attendance-body'); tbody.innerHTML = '';
             const filtered = studentsData.filter(s => s.year == selectedYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
             filtered.forEach((s, i) => {
-                let total = 0, checks = '';
+                let cells = ''; let total = 0;
                 for(let j=1; j<=12; j++) {
                     const isP = s[`attendance_${j}`] === true || s[`attendance_${j}`] === 'true';
                     if(isP) total++;
-                    checks += `<td class="px-2 py-3 text-center"><button onclick="toggleAttendanceManual('${s.name}', ${j})" class="w-8 h-8 rounded-lg border-2 font-black text-xs ${isP ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 text-slate-300'}">${isP ? '/' : 'O'}</button></td>`;
+                    cells += `<td class="px-2 py-3 text-center"><button class="w-8 h-8 rounded-lg border-2 ${isP?'bg-emerald-500 border-emerald-500 text-white':'border-slate-200 text-slate-300'}">${isP?'/':'O'}</button></td>`;
                 }
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="px-4 py-3 text-slate-400 font-bold">${i+1}</td><td class="px-4 py-3 font-bold sticky-col-name">${s.name}</td><td class="px-4 py-3 text-center font-bold text-indigo-600">${s.class_name||'-'}</td>${checks}<td class="px-4 py-3 text-center bg-indigo-50 font-bold text-indigo-700">${total}</td>`;
-                tbody.appendChild(tr);
+                tbody.innerHTML += `<tr><td class="px-4 py-3 text-slate-400 font-bold">${i+1}</td><td class="px-4 py-3 font-black text-slate-900 sticky-col-name">${s.name}</td><td class="px-4 py-3 text-center font-bold text-indigo-600">${s.class_name||'-'}</td>${cells}<td class="px-4 py-3 text-center bg-indigo-50 font-black text-indigo-700">${total}</td></tr>`;
             });
         }
 
-        async function toggleAttendanceManual(name, num) {
-            const s = studentsData.find(x => x.name === name);
-            const key = `attendance_${num}`;
-            s[key] = !(s[key] === true || s[key] === 'true');
-            await syncToSheet('update', s);
-        }
-
-        // --- SEARCH & UNIT ---
-        async function saveUnitName() {
-            const val = document.getElementById('unit-input').value.trim();
-            await syncToSheet('update', { record_type: 'unit_config', name: 'unit_config', unit_name: val });
-        }
-        function globalSearch() {
-            const q = document.getElementById('global-search-input').value.toUpperCase();
-            const resDiv = document.getElementById('search-results-content');
-            if (!q) { document.getElementById('global-search-results').classList.add('hidden'); return; }
-            const matches = studentsData.filter(s => s.name.includes(q)).slice(0, 10);
-            resDiv.innerHTML = '';
-            matches.forEach(s => {
-                const d = document.createElement('div');
-                d.className = "p-3 hover:bg-slate-50 cursor-pointer border-b text-sm flex justify-between items-center";
-                d.innerHTML = `<div><p class="font-bold">${s.name}</p><p class="text-[10px] text-slate-400">Tahun ${s.year} | ${s.class_name}</p></div>`;
-                d.onclick = () => { switchTab('attendance'); selectYear(s.year); document.getElementById('global-search-input').value = ''; document.getElementById('global-search-results').classList.add('hidden'); };
-                resDiv.appendChild(d);
-            });
-            document.getElementById('global-search-results').classList.remove('hidden');
-        }
-
-        // --- PDF DENGAN LOGO IMGUR ---
         function generateAttendancePDF() {
             if (!selectedYear) return;
             const students = studentsData.filter(s => s.year == selectedYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
@@ -326,7 +215,7 @@
                 dates.push(input && input.value ? input.value.split('-').reverse().slice(0,2).join('/') : '-');
             }
             const rows = students.map((s, idx) => {
-                let cells = '', count = 0;
+                let cells = ''; let count = 0;
                 for(let j=1; j<=12; j++) {
                     const isP = s[`attendance_${j}`] === true || s[`attendance_${j}`] === 'true';
                     if(isP) count++;
@@ -347,24 +236,6 @@
             const win = window.open('','_blank'); win.document.write(html); win.document.close();
         }
 
-        // --- INITIALIZE ---
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            refreshData();
-            document.getElementById('global-search-input').addEventListener('input', globalSearch);
-            document.getElementById('add-student-list-btn').addEventListener('click', async () => {
-                const n = document.getElementById('student-list-name-input').value.toUpperCase();
-                const c = document.getElementById('student-list-class-input').value.toUpperCase();
-                if(n) await syncToSheet('create', {name:n, class_name:c, year:studentListYear, record_type:'student'});
-                document.getElementById('student-list-name-input').value = ''; document.getElementById('student-list-class-input').value = '';
-            });
-            document.querySelectorAll('.date-input').forEach(i => i.addEventListener('change', e => {
-                if(!meetingDatesRecord) meetingDatesRecord = {record_type:'meeting_dates', name:'meeting_dates'};
-                meetingDatesRecord[`meeting_date_${e.target.dataset.date}`] = e.target.value;
-                syncToSheet('update', meetingDatesRecord);
-            }));
-        });
-
         function loadMeetingDates() {
             if(!meetingDatesRecord) return;
             for(let i=1;i<=12;i++) {
@@ -373,30 +244,7 @@
             }
         }
 
-        function updateAnalytics() {
-            const total = studentsData.length;
-            let present = 0;
-            studentsData.forEach(s => { for(let i=1;i<=12;i++) if(s[`attendance_${i}`] === true || s[`attendance_${i}`] === 'true') present++; });
-            const rate = total > 0 ? Math.round((present/(total*12))*100) : 0;
-            document.getElementById('total-present').textContent = present;
-            document.getElementById('total-absent').textContent = (total*12)-present;
-            document.getElementById('total-students').textContent = total;
-            document.getElementById('attendance-rate').textContent = rate + '%';
-        }
-
-        let studentToDelete = null;
-        function openDeleteModalManual(name) {
-            studentToDelete = studentsData.find(s => s.name === name);
-            document.getElementById('delete-student-name').textContent = `Padam "${name}"?`;
-            document.getElementById('delete-modal').classList.remove('hidden');
-        }
-        document.getElementById('confirm-delete').addEventListener('click', async () => {
-            if(document.getElementById('delete-pin-input').value === PIN) {
-                await syncToSheet('delete', studentToDelete);
-                document.getElementById('delete-modal').classList.add('hidden');
-                document.getElementById('delete-pin-input').value = '';
-            }
-        });
+        document.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); refreshData(); });
     </script>
 </body>
 </html>
