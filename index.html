@@ -548,30 +548,34 @@ console.log("Rekod Tarikh Ditemui:", meetingDatesRecord); // Untuk semakan di Co
 
     async function saveUnitName(val) { await syncToSheet('update', { record_type: 'unit_config', unit_name: val.toUpperCase() }); showAutoSaveNotification('Sistem', 'Nama unit dikemaskini'); }
 
-      async function saveMeetingDate(num, val) {
-    // Simpan tarikh ke dalam kolom attendance_1, attendance_2, dsb.
+async function saveMeetingDate(num, val) {
+    if (!val) return; 
+    
+    // val biasanya datang dari input date sebagai "YYYY-MM-DD"
+    // Kita simpan terus nilai string ini ke dalam rekod
     meetingDatesRecord[`attendance_${num}`] = val; 
     
     await syncToSheet('update', meetingDatesRecord);
-    showAutoSaveNotification('Tarikh', `Perjumpaan ${num} telah dikemaskini`);
 }
 
 function loadMeetingDatesUI() {
     for (let i = 1; i <= 12; i++) {
-        // Cari kotak input tarikh P1 hingga P12
         const input = document.querySelector(`.date-input[data-date="${i}"]`);
-        
         if (input && meetingDatesRecord) {
-            // Kita ambil data dari kolom attendance_1, attendance_2, dll
-            // Pastikan ejaan 'attendance_' sama dengan header di Sheets
-            const dateVal = meetingDatesRecord[`attendance_${i}`]; 
+            let dateVal = meetingDatesRecord[`attendance_${i}`];
             
             if (dateVal) {
-                // Jika ada tarikh, kita paparkan di kotak input
-                // Kita ambil 10 aksara pertama sahaja (YYYY-MM-DD)
-                input.value = dateVal.toString().substring(0, 10);
-            } else {
-                input.value = ''; // Kosongkan jika tiada data
+                // dateVal mungkin datang sebagai Objek Tarikh atau ISO String
+                // Kita tukar kepada string dan ambil 10 aksara pertama (YYYY-MM-DD)
+                let dateString = new Date(dateVal).toISOString().split('T')[0];
+                
+                // Jika masih lari, kita gunakan cara manual untuk pastikan tarikh kekal
+                const d = new Date(dateVal);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                
+                input.value = `${year}-${month}-${day}`;
             }
         }
     }
