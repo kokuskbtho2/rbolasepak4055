@@ -35,30 +35,48 @@
         .syncing { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
         .table-container { position: relative; }
         @media (max-width: 768px) { .table-container::after { content: '→'; position: absolute; right: 10px; top: 50%; opacity: 0.3; font-weight: bold; animation: nudge 2s infinite; display: block; } }
-        @media print {
-    /* Pastikan footer muncul di bawah setiap muka surat */
-    footer {
-        position: fixed;
-        bottom: 0;
+        @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+        /* --- PAPARAN DI WEB --- */
+.footer-koku {
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    margin-top: 30px;
+    /* Guna warna hitam seperti anda minta sebelum ini */
+    color: #000000; 
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 10px;
+}
+
+/* --- PAPARAN DI PDF (PRINT) --- */
+@media print {
+    .footer-koku {
+        position: fixed !important;
+        bottom: 0 !important;
         left: 0;
         right: 0;
-        text-align: center;
         border-top: 1px solid #000 !important;
-        padding-top: 10px;
+        background-color: white !important;
+        padding: 10px 0 !important;
+        /* Pastikan tulisan hitam pekat dalam PDF */
+        color: black !important;
+        display: block !important;
+    }
+
+    /* Elakkan data bertindih dengan footer dalam PDF */
+    body {
+        margin-bottom: 60px !important;
         background-color: white !important;
     }
 
-    /* Pastikan kandungan tidak bertindih dengan footer */
-    body {
-        margin-bottom: 50px;
-    }
-
-    /* Sembunyikan elemen yang tidak perlu dalam PDF (seperti butang carian/navigasi) */
-    .no-print, nav, button, .search-container {
+    /* Sembunyikan navigasi & butang dalam PDF */
+    nav, button, .no-print, .search-container {
         display: none !important;
     }
 }
-        @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
     </style>
 </head>
 <body class="bg-red-300 text-slate-900 antialiased">
