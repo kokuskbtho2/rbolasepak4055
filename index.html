@@ -572,12 +572,12 @@ function loadMeetingDatesUI() {
 
     function openDeleteModalManual(name) { studentToDelete = studentsData.find(s => s.name === name && s.year == studentListYear); document.getElementById('delete-student-name').textContent = `"${name}"`; document.getElementById('delete-modal').classList.remove('hidden'); }
     function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); document.getElementById('delete-pin-input').value = ''; }
-    async function confirmDelete() { if (document.getElementById('delete-pin-input').value !== PIN) { alert("PIN SALAH!"); return; } await syncToSheet('delete', studentToDelete); closeDeleteModal(); showAutoSaveNotification('Dipadam', `${deletedName} telah dikeluarkan.`);
+    async function confirmDelete() { if (document.getElementById('delete-pin-input').value !== PIN) { alert("PIN SALAH!"); return; } const nameToNotify = studentToDelete.name;await syncToSheet('delete', studentToDelete); closeDeleteModal(); showAutoSaveNotification('Dipadam', `${nameToNotify} telah dikeluarkan.`);
 }
 
     function openDeleteAllModal() { document.getElementById('delete-all-year').textContent = studentListYear; document.getElementById('delete-all-modal').classList.remove('hidden'); }
     function closeDeleteAllModal() { document.getElementById('delete-all-modal').classList.add('hidden'); document.getElementById('delete-all-pin-input').value = ''; }
-    async function confirmDeleteAll() { if (document.getElementById('delete-all-pin-input').value !== PIN) { alert("PIN SALAH!"); return; } const targets = studentsData.filter(s => s.year == studentListYear); toggleLoader(true); for (const t of targets) await syncToSheet('delete', t); closeDeleteAllModal(); toggleLoader(false); showAutoSaveNotification('Dipadam', `${deletedName} telah dikeluarkan.`);
+    async function confirmDeleteAll() { if (document.getElementById('delete-all-pin-input').value !== PIN) { alert("PIN SALAH!"); return; } const targets = studentsData.filter(s => s.year == studentListYear); toggleLoader(true); for (const t of targets) await syncToSheet('delete', t); closeDeleteAllModal(); toggleLoader(false); showAutoSaveNotification('Dipadam', `${totalDeleted} telah dikeluarkan.`);
 }
 
     // --- PDF GENERATORS ---
