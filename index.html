@@ -18,13 +18,27 @@
         #bulk-upload-student-list-modal:not(.hidden) .modal-content { transform: scale(1); opacity: 1; }
         .animate-slide-in { animation: slideIn 0.4s ease-out forwards; }
         @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .sticky-col { position: sticky; background: white; z-index: 10; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .search-container { text-align: center; margin-bottom: 20px; }
-        .global-logo { max-width: 150px; height: auto; display: block; margin: 0 auto 10px auto; }
+        .global-logo { max-width: 140px; height: auto; display: block; margin: 0 auto 20px auto; }
+        
+        /* Tambahan Penambahbaikan UI */
+        .loading-overlay { background: rgba(255,255,255,0.8); backdrop-filter: blur(2px); z-index: 9999; }
+        .syncing { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
+        .table-container { position: relative; }
+        .table-container::after { content: '→'; position: absolute; right: 10px; top: 50%; opacity: 0.3; font-weight: bold; animation: nudge 2s infinite; display: none; }
+        @media (max-width: 768px) { .table-container::after { display: block; } }
+        @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased">
+  
+  <div id="loading-spinner" class="hidden fixed inset-0 flex items-center justify-center loading-overlay">
+    <div class="flex flex-col items-center gap-3">
+        <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        <p class="text-xs font-black text-indigo-950 uppercase tracking-widest">Memuatkan Data...</p>
+    </div>
+  </div>
+
   <div class="min-h-screen pb-20">
     <nav class="bg-white border-b sticky top-0 z-40 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -33,8 +47,8 @@
             <i data-lucide="users" class="text-white w-6 h-6"></i>
           </div>
           <div>
-            <h1 id="school-title" class="font-extrabold text-indigo-950 tracking-tight">SK Bandar Tun Hussein Onn 2</h1>
-            <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest">Sistem Pengurusan Kehadiran Murid Kokurikulum</p>
+            <h1 class="font-extrabold text-indigo-950 tracking-tight">SKBTHO2</h1>
+            <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest">Sistem Kokurikulum</p>
           </div>
         </div>
         <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
@@ -45,42 +59,49 @@
       </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto px-4 py-8 text-center md:text-left">
+      
+      <img src="https://i.imgur.com/DLy3jZn.png" alt="Logo" class="global-logo">
+
       <div class="relative mb-8 max-w-2xl mx-auto">
-        <div class="search-container">
-            <img src="https://i.imgur.com/DLy3jZn.png" alt="Logo Syarikat" class="global-logo">
+        <div class="relative flex items-center text-left">
+          <div class="absolute left-4 text-slate-400">
+            <i data-lucide="search" class="w-5 h-5"></i>
+          </div>
+          <input type="text" id="global-search-input" 
+            placeholder="Cari nama murid atau kelas..." 
+            class="w-full pl-12 pr-44 py-4 bg-white border-2 border-slate-100 rounded-2xl shadow-xl shadow-slate-200/50 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none text-lg">
+          
+          <div class="absolute right-2 flex items-center gap-2">
+            <select id="global-search-year-filter" 
+              class="bg-slate-100 border-none rounded-xl px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-200 h-10">
+              <option value="all">Semua</option>
+              <option value="4">Thn 4</option>
+              <option value="5">Thn 5</option>
+              <option value="6">Thn 6</option>
+            </select>
+            <button id="global-search-clear" class="hidden w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
         </div>
-        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400">
-          <i data-lucide="search" class="w-5 h-5"></i>
-        </div>
-        <input type="text" id="global-search-input" placeholder="Cari nama murid atau kelas..." class="w-full pl-12 pr-24 py-4 bg-white border-2 border-slate-100 rounded-2xl shadow-xl shadow-slate-200/50 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none text-lg">
-        <div class="absolute inset-y-2 right-2 flex gap-2">
-           <select id="global-search-year-filter" class="bg-slate-50 border-none rounded-xl px-3 text-sm font-bold text-slate-600 outline-none">
-             <option value="all">Semua Tahun</option>
-             <option value="4">Tahun 4</option>
-             <option value="5">Tahun 5</option>
-             <option value="6">Tahun 6</option>
-           </select>
-           <button id="global-search-clear" class="hidden w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
-             <i data-lucide="x" class="w-5 h-5"></i>
-           </button>
-        </div>
-        <div id="global-search-results" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50">
+
+        <div id="global-search-results" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 text-left">
           <div class="p-2 max-h-[400px] overflow-y-auto" id="search-results-content"></div>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-8">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-8 text-left">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div class="flex-1">
             <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Nama Unit/Kelab</label>
-            <input type="text" id="unit-input" placeholder="Masukkan nama unit (cth: Pengakap / Bola Sepak)" class="w-full text-2xl font-black text-indigo-950 border-none p-0 focus:ring-0 placeholder:text-slate-200 uppercase tracking-tight">
+            <input type="text" id="unit-input" placeholder="Masukkan nama unit (cth: Pengakap)" class="w-full text-2xl font-black text-indigo-950 border-none p-0 focus:ring-0 placeholder:text-slate-200 uppercase tracking-tight">
           </div>
           <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
             <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
               <i data-lucide="calendar" class="w-6 h-6 text-indigo-600"></i>
             </div>
-            <div>
+            <div class="text-left">
               <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Tahun Semasa</p>
               <p class="text-lg font-black text-indigo-950">2026</p>
             </div>
@@ -90,162 +111,129 @@
 
       <div id="view-student-list" class="view-container">
         <div id="student-list-year-selection" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div onclick="selectStudentListYear(4)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-100 transition-all cursor-pointer group relative overflow-hidden">
-             <div class="absolute -right-4 -top-4 w-32 h-32 bg-indigo-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-             <div class="relative z-10">
-               <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-200 group-hover:rotate-12 transition-transform">
-                 <span class="text-2xl font-black">4</span>
-               </div>
-               <h3 class="text-xl font-black text-slate-900 mb-2">Tahun 4</h3>
-               <p id="student-list-year4-count" class="text-indigo-600 font-bold">0 murid</p>
+          <div onclick="selectStudentListYear(4)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-indigo-500 hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden">
+             <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-200 group-hover:rotate-12 transition-transform mx-auto md:mx-0">
+               <span class="text-2xl font-black">4</span>
              </div>
+             <h3 class="text-xl font-black text-slate-900 mb-2">Tahun 4</h3>
+             <p id="student-list-year4-count" class="text-indigo-600 font-bold">0 murid</p>
           </div>
-          <div onclick="selectStudentListYear(5)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-emerald-500 hover:shadow-2xl hover:shadow-emerald-100 transition-all cursor-pointer group relative overflow-hidden">
-             <div class="absolute -right-4 -top-4 w-32 h-32 bg-emerald-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-             <div class="relative z-10">
-               <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-200 group-hover:rotate-12 transition-transform">
-                 <span class="text-2xl font-black">5</span>
-               </div>
-               <h3 class="text-xl font-black text-slate-900 mb-2">Tahun 5</h3>
-               <p id="student-list-year5-count" class="text-emerald-600 font-bold">0 murid</p>
+          <div onclick="selectStudentListYear(5)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-emerald-500 hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden">
+             <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-200 group-hover:rotate-12 transition-transform mx-auto md:mx-0">
+               <span class="text-2xl font-black">5</span>
              </div>
+             <h3 class="text-xl font-black text-slate-900 mb-2">Tahun 5</h3>
+             <p id="student-list-year5-count" class="text-emerald-600 font-bold">0 murid</p>
           </div>
-          <div onclick="selectStudentListYear(6)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-rose-500 hover:shadow-2xl hover:shadow-rose-100 transition-all cursor-pointer group relative overflow-hidden">
-             <div class="absolute -right-4 -top-4 w-32 h-32 bg-rose-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-             <div class="relative z-10">
-               <div class="w-16 h-16 bg-rose-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-rose-200 group-hover:rotate-12 transition-transform">
-                 <span class="text-2xl font-black">6</span>
-               </div>
-               <h3 class="text-xl font-black text-slate-900 mb-2">Tahun 6</h3>
-               <p id="student-list-year6-count" class="text-rose-600 font-bold">0 murid</p>
+          <div onclick="selectStudentListYear(6)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-rose-500 hover:shadow-2xl transition-all cursor-pointer group relative overflow-hidden">
+             <div class="w-16 h-16 bg-rose-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-rose-200 group-hover:rotate-12 transition-transform mx-auto md:mx-0">
+               <span class="text-2xl font-black">6</span>
              </div>
+             <h3 class="text-xl font-black text-slate-900 mb-2">Tahun 6</h3>
+             <p id="student-list-year6-count" class="text-rose-600 font-bold">0 murid</p>
           </div>
         </div>
 
-        <div id="student-list-data-view" class="hidden space-y-6">
+        <div id="student-list-data-view" class="hidden space-y-6 text-left">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <button onclick="backToStudentListYearSelection()" class="flex items-center gap-2 text-slate-500 font-bold hover:text-indigo-600 transition-colors">
-              <i data-lucide="arrow-left" class="w-5 h-5"></i> Kembali ke Pemilihan Tahun
+              <i data-lucide="arrow-left" class="w-5 h-5"></i> Kembali
             </button>
             <div class="flex items-center gap-3">
-              <span id="student-list-selected-year-badge" class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-100">4</span>
-              <h2 id="student-list-selected-year-label" class="text-2xl font-black text-slate-900 tracking-tight">Tahun 4</h2>
+              <span id="student-list-selected-year-badge" class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-xl">4</span>
+              <h2 id="student-list-selected-year-label" class="text-2xl font-black text-slate-900">Tahun 4</h2>
             </div>
           </div>
+          
           <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
              <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                <div class="md:col-span-2">
-                 <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Nama Penuh Murid</label>
-                 <input type="text" id="student-list-name-input" placeholder="Masukkan nama murid..." class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-500 focus:ring-0 transition-all outline-none">
+                 <input type="text" id="student-list-name-input" placeholder="Nama Penuh Murid" class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-500 outline-none">
                </div>
                <div>
-                 <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Kelas</label>
-                 <input type="text" id="student-list-class-input" placeholder="Contoh: 4 BESTARI" class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-500 focus:ring-0 transition-all outline-none">
+                 <input type="text" id="student-list-class-input" placeholder="Kelas (Cth: 4B)" class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-500 outline-none">
                </div>
-               <div class="flex items-end">
-                 <button id="add-student-list-btn" class="w-full px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
-                   <i data-lucide="plus" class="w-5 h-5"></i> Tambah Murid
-                 </button>
-               </div>
+               <button id="add-student-list-btn" class="bg-indigo-600 text-white font-bold rounded-xl px-6 py-3 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">Tambah</button>
              </div>
           </div>
-          <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100">
-             <div class="flex gap-2">
-               <button id="bulk-upload-student-list-btn" class="px-4 py-2 bg-emerald-50 text-emerald-600 font-bold rounded-xl hover:bg-emerald-100 transition-all flex items-center gap-2">
+
+          <div class="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 gap-4">
+             <div class="flex flex-wrap gap-2 justify-center">
+               <button onclick="openBulkUploadModal()" class="px-4 py-2 bg-emerald-50 text-emerald-600 font-bold rounded-xl hover:bg-emerald-100 transition-all flex items-center gap-2">
                  <i data-lucide="upload" class="w-4 h-4"></i> Tambah Pukal
                </button>
-               <button id="print-student-list-btn" class="px-4 py-2 bg-slate-50 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition-all flex items-center gap-2">
+               <button onclick="generateStudentListPDF()" class="px-4 py-2 bg-slate-50 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition-all flex items-center gap-2">
                  <i data-lucide="printer" class="w-4 h-4"></i> Cetak Senarai
                </button>
              </div>
-             <button id="delete-all-student-list-btn" class="px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition-all flex items-center gap-2">
+             <button onclick="openDeleteAllModal()" class="px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition-all flex items-center gap-2">
                <i data-lucide="trash-2" class="w-4 h-4"></i> Padam Semua
              </button>
           </div>
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-slate-50 border-b border-slate-100">
-                  <tr>
-                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-widest w-20">Bil</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Nama Murid</th>
-                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-widest w-40">Kelas</th>
-                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-widest w-32">Tindakan</th>
-                  </tr>
-                </thead>
-                <tbody id="student-list-body" class="divide-y divide-slate-100"></tbody>
-              </table>
-              <div id="student-list-empty-state" class="hidden py-20 text-center">
-                 <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                   <i data-lucide="users" class="w-10 h-10 text-slate-200"></i>
-                 </div>
-                 <h3 class="text-slate-900 font-bold">Tiada data murid</h3>
-                 <p class="text-slate-400 text-sm">Sila tambah murid untuk mulakan senarai.</p>
-              </div>
-            </div>
+
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto table-container">
+            <table class="w-full">
+              <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-widest w-20">Bil</th>
+                  <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Nama Murid</th>
+                  <th class="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-widest w-40">Kelas</th>
+                  <th class="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-widest w-32">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="student-list-body" class="divide-y divide-slate-100"></tbody>
+            </table>
+            <div id="student-list-empty-state" class="hidden py-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Tiada data murid.</div>
           </div>
         </div>
       </div>
 
       <div id="view-attendance" class="view-container hidden">
          <div id="year-selection" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div onclick="selectYear(4)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-100 transition-all cursor-pointer group">
-               <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-200 group-hover:rotate-12 transition-transform"><span class="text-2xl font-black">4</span></div>
-               <h3 class="text-xl font-black text-slate-900 mb-2">Pilih Tahun 4</h3>
-               <p id="year4-count" class="text-indigo-600 font-bold">0 murid</p>
+            <div onclick="selectYear(4)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-indigo-500 hover:shadow-2xl transition-all cursor-pointer group text-center">
+               <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-4"><span class="text-2xl font-black">4</span></div>
+               <h3 class="text-xl font-black text-slate-900">Tahun 4</h3>
+               <p id="year4-count" class="text-indigo-600 font-bold text-sm">0 murid</p>
             </div>
-            <div onclick="selectYear(5)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-emerald-500 hover:shadow-2xl hover:shadow-emerald-100 transition-all cursor-pointer group">
-               <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-200 group-hover:rotate-12 transition-transform"><span class="text-2xl font-black">5</span></div>
-               <h3 class="text-xl font-black text-slate-900 mb-2">Pilih Tahun 5</h3>
-               <p id="year5-count" class="text-emerald-600 font-bold">0 murid</p>
+            <div onclick="selectYear(5)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-emerald-500 hover:shadow-2xl transition-all cursor-pointer group text-center">
+               <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-4"><span class="text-2xl font-black">5</span></div>
+               <h3 class="text-xl font-black text-slate-900">Tahun 5</h3>
+               <p id="year5-count" class="text-emerald-600 font-bold text-sm">0 murid</p>
             </div>
-            <div onclick="selectYear(6)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-rose-500 hover:shadow-2xl hover:shadow-rose-100 transition-all cursor-pointer group">
-               <div class="w-16 h-16 bg-rose-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-rose-200 group-hover:rotate-12 transition-transform"><span class="text-2xl font-black">6</span></div>
-               <h3 class="text-xl font-black text-slate-900 mb-2">Pilih Tahun 6</h3>
-               <p id="year6-count" class="text-rose-600 font-bold">0 murid</p>
+            <div onclick="selectYear(6)" class="bg-white rounded-3xl p-8 border-2 border-slate-100 hover:border-rose-500 hover:shadow-2xl transition-all cursor-pointer group text-center">
+               <div class="w-16 h-16 bg-rose-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-4"><span class="text-2xl font-black">6</span></div>
+               <h3 class="text-xl font-black text-slate-900">Tahun 6</h3>
+               <p id="year6-count" class="text-rose-600 font-bold text-sm">0 murid</p>
             </div>
          </div>
-         <div id="attendance-data-view" class="hidden space-y-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100">
-               <div class="flex items-center gap-4">
-                  <button onclick="backToYearSelection()" class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
-                  <div class="flex items-center gap-3">
-                     <span id="selected-year-badge" class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-lg">4</span>
-                     <h2 id="selected-year-label" class="text-xl font-black text-slate-900">Tahun 4</h2>
-                  </div>
-               </div>
-               <div class="flex flex-wrap gap-2">
-                  <button id="download-pdf-btn" class="px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i> Cetak PDF</button>
-                  <button onclick="generateComprehensiveReport(selectedYear)" class="px-4 py-2 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition-all flex items-center gap-2"><i data-lucide="clipboard-check" class="w-4 h-4"></i> Laporan Keseluruhan</button>
-               </div>
+
+         <div id="attendance-data-view" class="hidden space-y-6 text-left">
+            <div class="flex flex-col md:flex-row items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm gap-4">
+                <div class="flex items-center gap-4">
+                    <button onclick="backToYearSelection()" class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+                    <h2 id="selected-year-label-att" class="text-xl font-black text-slate-900 tracking-tight uppercase">Kehadiran Tahun 4</h2>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="generateAttendancePDF()" class="px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all flex items-center gap-2 text-sm shadow-lg shadow-indigo-100"><i data-lucide="printer" class="w-4 h-4"></i> Cetak PDF</button>
+                </div>
             </div>
+
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-               <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-indigo-500"></i> Rekod Tarikh Perjumpaan</h3>
-               <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P1</label><input type="date" data-date="1" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P2</label><input type="date" data-date="2" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P3</label><input type="date" data-date="3" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P4</label><input type="date" data-date="4" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P5</label><input type="date" data-date="5" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P6</label><input type="date" data-date="6" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P7</label><input type="date" data-date="7" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P8</label><input type="date" data-date="8" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P9</label><input type="date" data-date="9" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P10</label><input type="date" data-date="10" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P11</label><input type="date" data-date="11" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
-                  <div class="date-input-group p-3 bg-slate-50 rounded-xl border border-slate-100"><label class="text-[10px] font-black text-indigo-400 uppercase mb-1 block">P12</label><input type="date" data-date="12" class="date-input w-full bg-transparent border-none text-xs font-bold text-slate-900 p-0 focus:ring-0"></div>
+               <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
+                  <script>for(let i=1;i<=12;i++){document.write(`<div class="p-2 bg-slate-50 rounded-xl border border-slate-100 hover:border-indigo-200 transition-all"><label class="text-[9px] font-black text-indigo-400 uppercase block mb-1">P${i}</label><input type="date" data-date="${i}" class="date-input w-full bg-transparent border-none text-[10px] font-bold p-0 focus:ring-0"></div>`)}</script>
                </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-               <div class="overflow-x-auto overflow-y-visible">
-                  <table class="w-full text-sm">
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden table-container">
+               <div class="overflow-x-auto">
+                  <table class="w-full text-xs">
                      <thead class="bg-slate-50 border-b border-slate-100">
                         <tr>
-                           <th class="px-4 py-4 text-xs font-black text-slate-400 uppercase tracking-widest sticky left-0 bg-slate-50 z-20">No</th>
-                           <th class="px-4 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-widest sticky left-[48px] bg-slate-50 z-20">Nama</th>
-                           <th class="px-4 py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest sticky left-[228px] bg-slate-50 z-20">Kelas</th>
-                           <script>for(let i=1;i<=12;i++){document.write(`<th class="px-2 py-4 text-center text-xs font-black text-slate-400 uppercase">P${i}<br><button onclick="tickAllForMeeting(${i})" class="text-[9px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 transition-colors">/ Semua</button></th>`)}</script>
-                           <th class="px-4 py-4 text-center text-xs font-black text-slate-400 uppercase tracking-widest bg-indigo-50">Total</th>
+                           <th class="px-4 py-4 text-left w-10">Bil</th>
+                           <th class="px-4 py-4 text-left min-w-[150px]">Nama</th>
+                           <th class="px-2 py-4 text-center">Kelas</th>
+                           <script>for(let i=1;i<=12;i++){document.write(`<th class="px-1 py-4 text-center min-w-[45px]">P${i}<br><button onclick="tickAllForMeeting(${i})" class="text-[8px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 mt-1 uppercase transition-all">/ Semua</button></th>`)}</script>
+                           <th class="px-4 py-4 text-center bg-indigo-50 font-black">Jum</th>
                         </tr>
                      </thead>
                      <tbody id="attendance-body" class="divide-y divide-slate-100"></tbody>
@@ -255,389 +243,514 @@
          </div>
       </div>
 
-      <div id="view-analytics" class="view-container hidden space-y-8">
-        <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-            <div>
-              <h2 class="text-3xl font-black text-indigo-950 tracking-tight">Analisa Kehadiran</h2>
-              <p class="text-slate-500 font-medium">Ringkasan statistik dan prestasi unit</p>
+      <div id="view-analytics" class="view-container hidden">
+        <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-8 text-left">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                  <h2 class="text-3xl font-black text-indigo-950 tracking-tight uppercase">Analisa</h2>
+                  <p class="text-slate-500 font-medium">Statistik kehadiran murid 2026</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <select id="analytics-year-selector" onchange="updateAnalytics()" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 font-bold outline-none focus:border-indigo-500">
+                        <option value="4">Tahun 4</option><option value="5">Tahun 5</option><option value="6">Tahun 6</option>
+                    </select>
+                    <select id="meeting-selector" onchange="updateAnalytics()" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 font-bold outline-none focus:border-indigo-500">
+                        <option value="all">Keseluruhan</option>
+                        <script>for(let i=1;i<=12;i++){document.write(`<option value="${i}">Perjumpaan ${i}</option>`)}</script>
+                    </select>
+                </div>
             </div>
-            <div class="flex flex-wrap gap-4">
-               <select id="analytics-year-selector" class="bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 outline-none focus:border-indigo-500 transition-all"><option value="4">Tahun 4</option><option value="5">Tahun 5</option><option value="6">Tahun 6</option></select>
-               <select id="meeting-selector" class="bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 outline-none focus:border-indigo-500 transition-all"><option value="all">Keseluruhan (P1-P12)</option><script>for(let i=1;i<=12;i++){document.write(`<option value="${i}">Perjumpaan ${i}</option>`)}</script></select>
-               <button onclick="generateAnalyticsPDFForYear(parseInt(document.getElementById('analytics-year-selector').value))" class="bg-indigo-600 text-white font-bold px-6 py-3 rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2"><i data-lucide="printer" class="w-5 h-5"></i> Cetak Analisa</button>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                <div class="flex flex-col items-center justify-center relative scale-110">
+                    <svg class="w-48 h-48 donut-chart" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" stroke-width="10" />
+                        <circle id="attendance-circle" cx="50" cy="50" r="40" fill="none" stroke="#4f46e5" stroke-width="10" stroke-dasharray="0 251.2" stroke-linecap="round" />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="attendance-percentage" class="text-3xl font-black text-indigo-950">0%</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kehadiran</span>
+                    </div>
+                </div>
+                <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                    <div class="p-6 bg-emerald-50 rounded-2xl border border-emerald-100"><p class="text-xs font-bold text-emerald-600 mb-2 uppercase tracking-tighter">Hadir</p><p id="total-present" class="text-3xl font-black text-emerald-950">0</p></div>
+                    <div class="p-6 bg-rose-50 rounded-2xl border border-rose-100"><p class="text-xs font-bold text-rose-600 mb-2 uppercase tracking-tighter">Tidak Hadir</p><p id="total-absent" class="text-3xl font-black text-rose-950">0</p></div>
+                    <div class="p-6 bg-indigo-50 rounded-2xl border border-indigo-100"><p class="text-xs font-bold text-indigo-600 mb-2 uppercase tracking-tighter">Jumlah Ahli</p><p id="total-students" class="text-3xl font-black text-indigo-950">0</p></div>
+                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center"><button onclick="generateAnalyticsPDFForYear(document.getElementById('analytics-year-selector').value)" class="text-indigo-600 font-black hover:underline uppercase text-xs">Cetak Laporan</button></div>
+                </div>
             </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="flex flex-col items-center">
-              <div class="relative w-56 h-56">
-                <svg class="w-full h-full donut-chart" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" stroke-width="12" /><circle id="attendance-circle" cx="50" cy="50" r="40" fill="none" stroke="url(#gradient)" stroke-width="12" stroke-dasharray="0 251.2" stroke-linecap="round" /><defs><linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#6366f1" /><stop offset="100%" style="stop-color:#4f46e5" /></linearGradient></defs></svg>
-                <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="attendance-percentage" class="text-4xl font-black text-indigo-950">0%</span><span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Purata Kehadiran</span></div>
-              </div>
-              <p class="text-sm text-indigo-600 font-bold mt-4 px-4 py-1 bg-indigo-50 rounded-full" id="selected-meeting-label">Perjumpaan 1</p>
-            </div>
-            <div class="md:col-span-2 grid grid-cols-2 gap-4">
-              <div class="bg-emerald-50 rounded-3xl p-6 border border-emerald-100"><p class="text-emerald-600 font-bold uppercase text-xs tracking-widest mb-4">Hadir</p><p id="total-present" class="text-4xl font-black text-emerald-900">0</p></div>
-              <div class="bg-rose-50 rounded-3xl p-6 border border-rose-100"><p class="text-rose-600 font-bold uppercase text-xs tracking-widest mb-4">Tidak Hadir</p><p id="total-absent" class="text-4xl font-black text-rose-900">0</p></div>
-              <div class="bg-indigo-50 rounded-3xl p-6 border border-indigo-100"><p class="text-indigo-600 font-bold uppercase text-xs tracking-widest mb-4">Jumlah Murid</p><p id="total-students" class="text-4xl font-black text-indigo-900">0</p></div>
-              <div class="bg-amber-50 rounded-3xl p-6 border border-amber-100"><p class="text-amber-600 font-bold uppercase text-xs tracking-widest mb-4">Peratus</p><p id="attendance-rate" class="text-4xl font-black text-amber-900">0%</p></div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
 
-    <div id="bulk-upload-student-list-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[9999] modal-backdrop p-4">
+    <div id="bulk-upload-student-list-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[9999] modal-backdrop p-4 text-left">
       <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl modal-content">
-        <h3 class="text-2xl font-black text-slate-900 mb-2 text-center">Tambah Nama Murid Pukal</h3>
-        <textarea id="bulk-student-list-names-input" placeholder="Nama | Kelas" class="w-full h-48 px-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl resize-none mb-6 font-mono text-sm"></textarea>
-        <div class="flex gap-4"><button id="cancel-bulk-student-list-upload" class="flex-1 px-6 py-3 border-2 border-slate-100 rounded-2xl">Batal</button><button id="confirm-bulk-student-list-add" class="flex-1 px-6 py-3 bg-emerald-600 text-white font-bold rounded-2xl">Tambah Semua</button></div>
+        <h3 class="text-2xl font-black text-slate-900 mb-4 uppercase tracking-tighter">Tambah Pukal</h3>
+        <p class="text-[10px] text-slate-500 mb-2 font-bold uppercase tracking-widest">Format: NAMA MURID | KELAS (Baris Baru)</p>
+        <textarea id="bulk-student-list-names-input" placeholder="MUHAMMAD ALI | 4 BESTARI&#10;AHMAD ABU | 4 DINAMIK" class="w-full h-48 px-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl resize-none mb-6 font-mono text-sm focus:border-indigo-500 outline-none transition-all"></textarea>
+        <div class="flex gap-4">
+            <button onclick="closeBulkUploadStudentListModal()" class="flex-1 px-6 py-3 border-2 border-slate-100 rounded-2xl font-bold hover:bg-slate-50 transition-all">Batal</button>
+            <button onclick="processBulkUpload()" class="flex-1 px-6 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">Proses</button>
+        </div>
       </div>
     </div>
 
     <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[9999] modal-backdrop p-4">
       <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl modal-content text-center">
         <h3 class="text-2xl font-black text-slate-900 mb-2">Padam Murid?</h3>
-        <p id="delete-student-name" class="text-slate-500 mb-6 font-medium">Sila masukkan PIN untuk sahkan.</p>
-        <input type="password" id="delete-pin-input" placeholder="XXXX" class="w-full border-2 border-slate-100 rounded-xl px-4 py-3 text-center mb-4">
-        <p id="pin-error" class="hidden text-rose-600 text-xs mb-4">PIN SALAH!</p>
-        <div class="flex gap-4"><button id="cancel-delete" class="flex-1 px-6 py-3 border-2 border-slate-100 rounded-2xl font-bold">Batal</button><button id="confirm-delete" class="flex-1 px-6 py-3 bg-rose-600 text-white font-bold rounded-2xl">Ya, Padam</button></div>
+        <p id="delete-student-name" class="text-slate-500 mb-6 font-medium text-sm"></p>
+        <input type="password" id="delete-pin-input" placeholder="PIN" class="w-full border-2 border-slate-100 rounded-xl px-4 py-3 text-center mb-4 font-bold tracking-[1em] focus:border-rose-500 outline-none">
+        <div class="flex gap-4">
+            <button onclick="closeDeleteModal()" class="flex-1 px-6 py-3 border-2 border-slate-100 rounded-2xl font-bold">Batal</button>
+            <button onclick="confirmDelete()" class="flex-1 px-6 py-3 bg-rose-600 text-white font-bold rounded-2xl shadow-lg shadow-rose-100">Padam</button>
+        </div>
       </div>
     </div>
 
     <div id="delete-all-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[9999] modal-backdrop p-4">
-      <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl modal-content text-center">
-        <h3 class="text-2xl font-black text-slate-900 mb-2">PADAM SEMUA?</h3>
-        <p class="mb-4">Tahun: <span id="delete-all-year-label" class="font-bold"></span></p>
-        <p class="mb-6">Jumlah: <span id="delete-all-count" class="font-bold text-rose-600"></span></p>
-        <input type="password" id="delete-all-pin-input" placeholder="PIN" class="w-full border-2 border-slate-100 rounded-xl px-4 py-3 text-center mb-4">
-        <div class="flex gap-4"><button id="cancel-delete-all" class="flex-1 px-6 py-3 bg-slate-100 rounded-2xl font-bold">Batal</button><button id="confirm-delete-all" class="flex-1 px-6 py-3 bg-rose-600 text-white font-bold rounded-2xl">PADAM</button></div>
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl modal-content text-center border-t-8 border-rose-600">
+          <h3 class="text-2xl font-black text-rose-600 mb-2 uppercase italic tracking-tighter">Amaran Keras</h3>
+          <p class="text-slate-600 mb-2 text-sm font-bold uppercase">Padam Semua Data Tahun <span id="delete-all-year"></span>?</p>
+          <p class="text-xs font-bold text-slate-400 mb-6">Tindakan ini tidak boleh diundur.</p>
+          <input type="password" id="delete-all-pin-input" placeholder="PIN" class="w-full border-2 border-slate-100 rounded-xl px-4 py-3 text-center mb-4 font-bold tracking-[1em] focus:border-rose-500 outline-none">
+          <div class="flex gap-4">
+              <button onclick="closeDeleteAllModal()" class="flex-1 px-6 py-3 border-2 border-slate-100 rounded-2xl font-bold">Batal</button>
+              <button onclick="confirmDeleteAll()" class="flex-1 px-6 py-3 bg-rose-600 text-white font-bold rounded-2xl">PADAM SEMUA</button>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <footer class="mt-12 py-8 text-center border-t border-slate-200"><p class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">© 2026 - Unit Kokurikulum SKBTHO2</p></footer>
+    <footer class="mt-12 py-8 text-center border-t border-slate-200">
+        <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">SK Bandar Tun Hussein Onn (2) © 2026</p>
+    </footer>
   </div>
 
   <script>
+    // --- KONFIGURASI SCRIPT URL ---
     const SCRIPT_URL = "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI";
-    let config = { school_name: 'SK Bandar Tun Hussein Onn 2', unit_name: '' };
+    
+    let config = { unit_name: '' };
     let studentsData = [];
-    let studentToDelete = null;
-    let currentView = 'student_list';
+    let meetingDatesRecord = null;
     let selectedYear = null;
     let studentListYear = null;
-    let analyticsYear = 4;
-    const PIN = 'KOKU4055';
-    let meetingDatesRecord = null;
+    let studentToDelete = null;
+    let isInitialLoad = true;
+    const PIN = "KOKU4055";
+
+    // Helper: Show/Hide Loading
+    function toggleLoader(show) {
+        document.getElementById('loading-spinner').classList.toggle('hidden', !show);
+    }
+
+    // 1. Initial Load
+    document.addEventListener('DOMContentLoaded', initializeApp);
+
+    async function initializeApp() {
+        lucide.createIcons();
+        setupEventListeners();
+        await loadData();
+    }
+
+    function setupEventListeners() {
+        document.getElementById('tab-student-list').onclick = () => switchTab('student-list');
+        document.getElementById('tab-attendance').onclick = () => switchTab('attendance');
+        document.getElementById('tab-analytics').onclick = () => switchTab('analytics');
+        document.getElementById('add-student-list-btn').onclick = addStudentFromList;
+        document.getElementById('global-search-input').oninput = globalSearch;
+        document.getElementById('global-search-clear').onclick = clearGlobalSearch;
+        
+        let unitTimeout;
+        document.getElementById('unit-input').oninput = (e) => {
+            clearTimeout(unitTimeout);
+            unitTimeout = setTimeout(() => saveUnitName(e.target.value), 800);
+        };
+
+        document.querySelectorAll('.date-input').forEach(input => {
+            input.onchange = (e) => saveMeetingDate(e.target.dataset.date, e.target.value);
+        });
+    }
 
     async function loadData() {
         if (SCRIPT_URL.includes("MASUKKAN_URL")) return;
+        if (isInitialLoad) toggleLoader(true);
         try {
             const response = await fetch(SCRIPT_URL);
             const data = await response.json();
+            
             studentsData = data.filter(d => d.record_type === 'student');
-            const unitConfig = data.find(d => d.record_type === 'unit_config');
-            if (unitConfig) {
-                config.unit_name = unitConfig.unit_name || '';
+            const unitCfg = data.find(d => d.record_type === 'unit_config');
+            if (unitCfg) {
+                config.unit_name = unitCfg.unit_name || '';
                 document.getElementById('unit-input').value = config.unit_name;
             }
             meetingDatesRecord = data.find(d => d.record_type === 'meeting_dates') || { record_type: 'meeting_dates' };
-            loadMeetingDates();
+            
             updateYearCounts();
+            loadMeetingDatesUI();
             if (studentListYear) renderStudentListRows();
             if (selectedYear) renderStudentRows();
             updateAnalytics();
-        } catch (e) { console.error(e); }
-    }
-
-    async function syncToSheet(action, data) {
-        // Baiki isu pertindanan dengan memastikan data murid ada 'year' dan 'name'
-        if(data.record_type === 'student') data.sync_id = `${data.year}_${data.name}`;
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, data })
-            });
-            setTimeout(loadData, 1000);
-        } catch (e) { console.error(e); }
-    }
-
-    function initializeApp() { setupEventListeners(); lucide.createIcons(); loadData(); }
-
-    function setupEventListeners() {
-      document.getElementById('tab-student-list').onclick = () => switchTab('student-list');
-      document.getElementById('tab-attendance').onclick = () => switchTab('attendance');
-      document.getElementById('tab-analytics').onclick = () => switchTab('analytics');
-      document.getElementById('add-student-list-btn').onclick = addStudentFromList;
-      document.getElementById('bulk-upload-student-list-btn').onclick = openBulkUploadModal;
-      document.getElementById('cancel-bulk-student-list-upload').onclick = closeBulkUploadStudentListModal;
-      document.getElementById('confirm-bulk-student-list-add').onclick = processBulkUpload;
-      document.getElementById('cancel-delete').onclick = closeDeleteModal;
-      document.getElementById('confirm-delete').onclick = confirmDelete;
-      document.getElementById('cancel-delete-all').onclick = closeDeleteAllModal;
-      document.getElementById('confirm-delete-all').onclick = confirmDeleteAll;
-      document.getElementById('delete-all-student-list-btn').onclick = openDeleteAllModal;
-      document.getElementById('analytics-year-selector').onchange = updateAnalytics;
-      document.getElementById('meeting-selector').onchange = updateAnalytics;
-      document.getElementById('download-pdf-btn').onclick = generateAttendancePDF;
-      document.getElementById('print-student-list-btn').onclick = generateStudentListPDF;
-      document.getElementById('global-search-input').oninput = globalSearch;
-      document.querySelectorAll('.date-input').forEach(input => {
-        input.onchange = function() { saveMeetingDate(this.getAttribute('data-date'), this.value); };
-      });
-      let uTimeout;
-      document.getElementById('unit-input').oninput = () => {
-          clearTimeout(uTimeout);
-          uTimeout = setTimeout(saveUnitName, 800);
-      };
-    }
-
-    async function saveUnitName() {
-        const val = document.getElementById('unit-input').value.trim();
-        config.unit_name = val;
-        await syncToSheet('update', { record_type: 'unit_config', unit_name: val });
-        showAutoSaveNotification('Disimpan!', 'Nama unit dikemaskini');
-    }
-
-    async function saveMeetingDate(num, val) {
-        meetingDatesRecord[`meeting_date_${num}`] = val;
-        await syncToSheet('update', meetingDatesRecord);
-        showAutoSaveNotification('Tarikh Disimpan!', `P${num} dikemaskini`);
-    }
-
-    function loadMeetingDates() {
-        for (let i = 1; i <= 12; i++) {
-            const input = document.querySelector(`.date-input[data-date="${i}"]`);
-            if (input && meetingDatesRecord[`meeting_date_${i}`]) input.value = meetingDatesRecord[`meeting_date_${i}`];
+        } catch (e) { 
+            console.error("Load Error:", e);
+            alert("Ralat memuat data. Sila periksa internet atau URL Web App.");
+        } finally {
+            toggleLoader(false);
+            isInitialLoad = false;
         }
     }
 
+    async function syncToSheet(action, data, elementRef = null) {
+        if(data.record_type === 'student') data.id = `${data.year}_${data.name}`;
+        
+        // Visual feedback
+        if (elementRef) elementRef.classList.add('syncing');
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ action, data })
+            });
+            // Kerana no-cors, kita tidak boleh baca response. Kita andaikan berjaya selepas delay kecil
+            setTimeout(loadData, 500); 
+        } catch (e) { 
+            console.error("Sync Error:", e);
+            alert("Gagal menyimpan data ke Google Sheets.");
+        } finally {
+            if (elementRef) elementRef.classList.remove('syncing');
+        }
+    }
+
+    // --- LOGIC: TABS & VIEWS ---
     function switchTab(tab) {
-      currentView = tab;
-      document.querySelectorAll('.view-container').forEach(v => v.classList.add('hidden'));
-      document.getElementById(`view-${tab}`).classList.remove('hidden');
-      ['tab-student-list', 'tab-attendance', 'tab-analytics'].forEach(id => {
-        const btn = document.getElementById(id);
-        btn.classList.remove('bg-red-500', 'text-white', 'shadow-md');
-        btn.classList.add('text-slate-600', 'hover:bg-slate-200');
-      });
-      document.getElementById(`tab-${tab}`).classList.add('bg-red-500', 'text-white', 'shadow-md');
+        document.querySelectorAll('.view-container').forEach(v => v.classList.add('hidden'));
+        document.getElementById(`view-${tab}`).classList.remove('hidden');
+        
+        ['tab-student-list', 'tab-attendance', 'tab-analytics'].forEach(id => {
+            const btn = document.getElementById(id);
+            btn.classList.remove('bg-red-500', 'text-white', 'shadow-md');
+            btn.classList.add('text-slate-600', 'hover:bg-slate-200');
+        });
+        document.getElementById(`tab-${tab}`).classList.add('bg-red-500', 'text-white', 'shadow-md');
     }
 
-    function updateYearCounts() {
-      [4, 5, 6].forEach(y => {
-        const count = studentsData.filter(s => s.year == y).length;
-        document.getElementById(`year${y}-count`).textContent = count + ' murid';
-        document.getElementById(`student-list-year${y}-count`).textContent = count + ' murid';
-      });
-    }
-
-    function selectStudentListYear(year) {
-      studentListYear = year;
-      document.getElementById('student-list-year-selection').classList.add('hidden');
-      document.getElementById('student-list-data-view').classList.remove('hidden');
-      document.getElementById('student-list-selected-year-badge').textContent = year;
-      document.getElementById('student-list-selected-year-label').textContent = 'Tahun ' + year;
-      renderStudentListRows();
+    // --- LOGIC: STUDENT LIST ---
+    function selectStudentListYear(y) {
+        studentListYear = y;
+        document.getElementById('student-list-year-selection').classList.add('hidden');
+        document.getElementById('student-list-data-view').classList.remove('hidden');
+        document.getElementById('student-list-selected-year-badge').textContent = y;
+        document.getElementById('student-list-selected-year-label').textContent = 'Tahun ' + y;
+        renderStudentListRows();
     }
 
     function backToStudentListYearSelection() {
-      studentListYear = null;
-      document.getElementById('student-list-year-selection').classList.remove('hidden');
-      document.getElementById('student-list-data-view').classList.add('hidden');
+        studentListYear = null;
+        document.getElementById('student-list-year-selection').classList.remove('hidden');
+        document.getElementById('student-list-data-view').classList.add('hidden');
     }
 
     function renderStudentListRows() {
-      const students = studentsData.filter(s => s.year == studentListYear);
-      const tbody = document.getElementById('student-list-body');
-      tbody.innerHTML = '';
-      if (students.length === 0) { document.getElementById('student-list-empty-state').classList.remove('hidden'); return; }
-      document.getElementById('student-list-empty-state').classList.add('hidden');
-      students.sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name)).forEach((s, i) => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition-colors";
-        tr.innerHTML = `
-          <td class="px-6 py-4 font-bold text-slate-400">${i + 1}</td>
-          <td class="px-6 py-4 font-black text-slate-900">${s.name}</td>
-          <td class="px-6 py-4 text-center font-bold text-indigo-600">${s.class_name || '-'}</td>
-          <td class="px-6 py-4 text-center">
-            <button onclick="openDeleteModalManual('${s.name}')" class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-          </td>`;
-        tbody.appendChild(tr);
-      });
-      lucide.createIcons();
+        const tbody = document.getElementById('student-list-body');
+        const students = studentsData.filter(s => s.year == studentListYear)
+            .sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
+        
+        tbody.innerHTML = '';
+        if (students.length === 0) { document.getElementById('student-list-empty-state').classList.remove('hidden'); return; }
+        document.getElementById('student-list-empty-state').classList.add('hidden');
+
+        students.forEach((s, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="px-6 py-4 font-bold text-slate-400">${i+1}</td>
+                <td class="px-6 py-4 font-black text-slate-900 uppercase text-xs md:text-sm">${s.name}</td>
+                <td class="px-6 py-4 text-center font-bold text-indigo-600 uppercase text-xs">${s.class_name || '-'}</td>
+                <td class="px-6 py-4 text-center">
+                    <button onclick="openDeleteModalManual('${s.name}')" class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        lucide.createIcons();
     }
 
     async function addStudentFromList() {
-      const name = document.getElementById('student-list-name-input').value.trim().toUpperCase();
-      const cls = document.getElementById('student-list-class-input').value.trim().toUpperCase();
-      if (!name || !studentListYear) return;
-      const data = { name, year: studentListYear, class_name: cls, record_type: 'student' };
-      for(let j=1;j<=12;j++) data[`attendance_${j}`] = false;
-      await syncToSheet('create', data);
-      document.getElementById('student-list-name-input').value = '';
-      document.getElementById('student-list-class-input').value = '';
+        const name = document.getElementById('student-list-name-input').value.trim().toUpperCase();
+        const cls = document.getElementById('student-list-class-input').value.trim().toUpperCase();
+        if (!name || !studentListYear) return;
+
+        const data = { name, year: studentListYear, class_name: cls, record_type: 'student' };
+        for(let i=1; i<=12; i++) data[`attendance_${i}`] = false;
+
+        await syncToSheet('create', data, document.getElementById('add-student-list-btn'));
+        document.getElementById('student-list-name-input').value = '';
+        document.getElementById('student-list-class-input').value = '';
+        showAutoSaveNotification('Berjaya!', 'Murid ditambah');
     }
 
     function openBulkUploadModal() { document.getElementById('bulk-upload-student-list-modal').classList.remove('hidden'); }
     function closeBulkUploadStudentListModal() { document.getElementById('bulk-upload-student-list-modal').classList.add('hidden'); }
     
     async function processBulkUpload() {
-      const text = document.getElementById('bulk-student-list-names-input').value.trim();
-      if (!text) return;
-      const lines = text.split('\n').filter(l => l.trim());
-      for (const line of lines) {
-        let name = '', cls = '';
-        if (line.includes('|')) [name, cls] = line.split('|').map(x => x.trim().toUpperCase());
-        else if (line.includes('\t')) [name, cls] = line.split('\t').map(x => x.trim().toUpperCase());
-        else name = line.toUpperCase();
-        const data = { name, year: studentListYear, class_name: cls, record_type: 'student' };
-        for(let j=1;j<=12;j++) data[`attendance_${j}`] = false;
-        await syncToSheet('create', data);
-      }
-      closeBulkUploadStudentListModal();
+        const text = document.getElementById('bulk-student-list-names-input').value.trim();
+        if (!text) return;
+        toggleLoader(true);
+        const lines = text.split('\n').filter(l => l.trim());
+        for (const line of lines) {
+            let name = '', cls = '';
+            if (line.includes('|')) { [name, cls] = line.split('|').map(x => x.trim().toUpperCase()); }
+            else { name = line.trim().toUpperCase(); }
+            
+            const data = { name, year: studentListYear, class_name: cls, record_type: 'student' };
+            for(let i=1; i<=12; i++) data[`attendance_${i}`] = false;
+            await syncToSheet('create', data);
+        }
+        closeBulkUploadStudentListModal();
+        toggleLoader(false);
+        showAutoSaveNotification('Selesai', 'Pemuatan pukal berjaya');
     }
 
-    function openDeleteModalManual(name) {
-        studentToDelete = studentsData.find(s => s.name === name && s.year == studentListYear);
-        document.getElementById('delete-modal').classList.remove('hidden');
-    }
-    function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
-    async function confirmDelete() {
-        if (document.getElementById('delete-pin-input').value !== PIN) { document.getElementById('pin-error').classList.remove('hidden'); return; }
-        await syncToSheet('delete', studentToDelete);
-        closeDeleteModal();
-    }
-
-    function openDeleteAllModal() {
-        const count = studentsData.filter(s => s.year == studentListYear).length;
-        document.getElementById('delete-all-year-label').textContent = studentListYear;
-        document.getElementById('delete-all-count').textContent = count;
-        document.getElementById('delete-all-modal').classList.remove('hidden');
-    }
-    function closeDeleteAllModal() { document.getElementById('delete-all-modal').classList.add('hidden'); }
-    async function confirmDeleteAll() {
-        if (document.getElementById('delete-all-pin-input').value !== PIN) return;
-        const targets = studentsData.filter(s => s.year == studentListYear);
-        for (const t of targets) await syncToSheet('delete', t);
-        closeDeleteAllModal();
-    }
-
+    // --- LOGIC: ATTENDANCE ---
     function selectYear(y) {
         selectedYear = y;
         document.getElementById('year-selection').classList.add('hidden');
         document.getElementById('attendance-data-view').classList.remove('hidden');
-        document.getElementById('selected-year-badge').textContent = y;
+        document.getElementById('selected-year-label-att').textContent = `Kehadiran Tahun ${y}`;
         renderStudentRows();
     }
-    function backToYearSelection() { selectedYear = null; document.getElementById('year-selection').classList.remove('hidden'); document.getElementById('attendance-data-view').classList.add('hidden'); }
+
+    function backToYearSelection() {
+        selectedYear = null;
+        document.getElementById('year-selection').classList.remove('hidden');
+        document.getElementById('attendance-data-view').classList.add('hidden');
+    }
 
     function renderStudentRows() {
         const tbody = document.getElementById('attendance-body');
+        const students = studentsData.filter(s => s.year == selectedYear)
+            .sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
+        
         tbody.innerHTML = '';
-        const students = studentsData.filter(s => s.year == selectedYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
         students.forEach((s, i) => {
             let total = 0;
             let checks = '';
             for (let j = 1; j <= 12; j++) {
                 const isP = s[`attendance_${j}`] === true || s[`attendance_${j}`] === 'true';
                 if (isP) total++;
-                checks += `<td class="px-2 py-3 text-center"><button onclick="toggleAttendanceManual('${s.name}', ${j})" class="w-8 h-8 rounded-lg border-2 font-black text-xs transition-all ${isP ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 text-slate-300'}">${isP ? '/' : 'O'}</button></td>`;
+                checks += `
+                    <td class="px-1 py-3 text-center">
+                        <button onclick="toggleAttendanceManual('${s.name}', ${j}, this)" 
+                            class="w-8 h-8 rounded-lg border-2 font-black text-[10px] transition-all hover:scale-110 ${isP ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-100' : 'border-slate-200 text-slate-300'}">
+                            ${isP ? '/' : 'O'}
+                        </button>
+                    </td>`;
             }
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td class="px-4 py-3 text-slate-400 font-bold sticky left-0 bg-white">${i+1}</td><td class="px-4 py-3 font-black text-indigo-950 sticky left-[48px] bg-white min-w-[180px]">${s.name}</td><td class="px-4 py-3 text-center font-bold text-indigo-600 sticky left-[228px] bg-white">${s.class_name || '-'}</td>${checks}<td class="px-4 py-3 text-center bg-indigo-50 font-black text-indigo-700">${total}</td>`;
+            tr.innerHTML = `
+                <td class="px-4 py-3 font-bold text-slate-400">${i+1}</td>
+                <td class="px-4 py-3 font-black text-indigo-950 uppercase text-[11px] md:text-sm">${s.name}</td>
+                <td class="px-2 py-3 text-center font-bold text-indigo-600 uppercase text-[10px]">${s.class_name || '-'}</td>
+                ${checks}
+                <td class="px-4 py-3 text-center bg-indigo-50 font-black text-indigo-700">${total}</td>
+            `;
             tbody.appendChild(tr);
         });
     }
 
-    async function toggleAttendanceManual(name, num) {
+    async function toggleAttendanceManual(name, num, btn) {
         const s = studentsData.find(x => x.name === name && x.year == selectedYear);
         const key = `attendance_${num}`;
-        s[key] = !(s[key] === true || s[key] === 'true');
-        await syncToSheet('update', s);
+        const newState = !(s[key] === true || s[key] === 'true');
+        
+        // Optimistic UI update
+        s[key] = newState;
+        btn.classList.toggle('bg-emerald-500', newState);
+        btn.classList.toggle('border-emerald-500', newState);
+        btn.classList.toggle('text-white', newState);
+        btn.textContent = newState ? '/' : 'O';
+        
+        await syncToSheet('update', s, btn);
     }
 
     async function tickAllForMeeting(num) {
-        const students = studentsData.filter(s => s.year == selectedYear);
-        for (const s of students) { s[`attendance_${num}`] = true; await syncToSheet('update', s); }
+        if(!confirm(`Tanda hadir SEMUA murid untuk Perjumpaan ${num}?`)) return;
+        toggleLoader(true);
+        const targets = studentsData.filter(s => s.year == selectedYear);
+        for (const s of targets) {
+            s[`attendance_${num}`] = true;
+            await syncToSheet('update', s);
+        }
+        toggleLoader(false);
+        showAutoSaveNotification('Selesai!', `Semua ditanda hadir P${num}`);
     }
 
+    // --- LOGIC: ANALYTICS ---
     function updateAnalytics() {
-      const ay = parseInt(document.getElementById('analytics-year-selector').value);
-      const mv = document.getElementById('meeting-selector').value;
-      const filtered = studentsData.filter(s => s.year == ay);
-      let present = 0, totalP = 0, per = 0;
-      if (mv === 'all') {
-          totalP = filtered.length * 12;
-          filtered.forEach(s => { for(let i=1; i<=12; i++) if(s[`attendance_${i}`] === true || s[`attendance_${i}`] === 'true') present++; });
-          document.getElementById('selected-meeting-label').textContent = "Keseluruhan (12 Perjumpaan)";
-      } else {
-          const m = parseInt(mv);
-          totalP = filtered.length;
-          filtered.forEach(s => { if(s[`attendance_${m}`] === true || s[`attendance_${m}`] === 'true') present++; });
-          document.getElementById('selected-meeting-label').textContent = "Perjumpaan " + m;
-      }
-      per = totalP > 0 ? Math.round((present/totalP)*100) : 0;
-      document.getElementById('total-present').textContent = present;
-      document.getElementById('total-absent').textContent = totalP - present;
-      document.getElementById('total-students').textContent = filtered.length;
-      document.getElementById('attendance-percentage').textContent = per + '%';
-      document.getElementById('attendance-rate').textContent = per + '%';
-      const circ = 251.2;
-      document.getElementById('attendance-circle').style.strokeDashoffset = circ - (per/100)*circ;
-      document.getElementById('attendance-circle').style.strokeDasharray = circ;
+        const y = document.getElementById('analytics-year-selector').value;
+        const mv = document.getElementById('meeting-selector').value;
+        const students = studentsData.filter(s => s.year == y);
+        
+        let present = 0, totalPossible = 0;
+        if (mv === 'all') {
+            totalPossible = students.length * 12;
+            students.forEach(s => { for(let i=1;i<=12;i++) if(s[`attendance_${i}`] === true || s[`attendance_${i}`] === 'true') present++; });
+        } else {
+            totalPossible = students.length;
+            students.forEach(s => { if(s[`attendance_${mv}`] === true || s[`attendance_${mv}`] === 'true') present++; });
+        }
+
+        const percentage = totalPossible > 0 ? Math.round((present/totalPossible)*100) : 0;
+        document.getElementById('total-present').textContent = present;
+        document.getElementById('total-absent').textContent = Math.max(0, totalPossible - present);
+        document.getElementById('total-students').textContent = students.length;
+        document.getElementById('attendance-percentage').textContent = percentage + '%';
+        
+        const circ = 251.2;
+        document.getElementById('attendance-circle').style.strokeDashoffset = circ - (percentage/100)*circ;
+        document.getElementById('attendance-circle').style.strokeDasharray = circ;
     }
 
+    // --- LOGIC: SEARCH ---
     function globalSearch() {
-        const q = document.getElementById('global-search-input').value.toUpperCase();
-        const res = document.getElementById('search-results-content');
-        if (!q) { document.getElementById('global-search-results').classList.add('hidden'); return; }
-        const matched = studentsData.filter(s => s.name.includes(q));
-        res.innerHTML = '';
-        matched.slice(0, 10).forEach(s => {
-            const d = document.createElement('div');
-            d.className = "p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100";
-            d.innerHTML = `<p class="font-black text-indigo-900">${s.name}</p><p class="text-xs text-slate-400">Tahun ${s.year} | ${s.class_name}</p>`;
-            d.onclick = () => { switchTab('attendance'); selectYear(s.year); };
-            res.appendChild(d);
+        const q = document.getElementById('global-search-input').value.trim().toUpperCase();
+        const yearF = document.getElementById('global-search-year-filter').value;
+        const container = document.getElementById('global-search-results');
+        const content = document.getElementById('search-results-content');
+        const clearBtn = document.getElementById('global-search-clear');
+
+        if (!q) { container.classList.add('hidden'); clearBtn.classList.add('hidden'); return; }
+        clearBtn.classList.remove('hidden');
+
+        let filtered = studentsData.filter(s => s.name.includes(q));
+        if (yearF !== 'all') filtered = filtered.filter(s => s.year == yearF);
+
+        content.innerHTML = '';
+        if (filtered.length === 0) {
+            content.innerHTML = '<div class="p-4 text-center text-slate-400 text-sm font-bold uppercase tracking-widest">Tiada hasil ditemui</div>';
+        } else {
+            filtered.slice(0, 10).forEach(s => {
+                const div = document.createElement('div');
+                div.className = "p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 transition-all";
+                div.innerHTML = `<p class="font-black text-indigo-950 uppercase text-sm">${s.name}</p><p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Tahun ${s.year} • ${s.class_name}</p>`;
+                div.onclick = () => {
+                    switchTab('attendance');
+                    selectYear(s.year);
+                    clearGlobalSearch();
+                };
+                content.appendChild(div);
+            });
+        }
+        container.classList.remove('hidden');
+    }
+
+    function clearGlobalSearch() {
+        document.getElementById('global-search-input').value = '';
+        document.getElementById('global-search-results').classList.add('hidden');
+        document.getElementById('global-search-clear').classList.add('hidden');
+    }
+
+    // --- HELPER FUNCTIONS ---
+    async function saveUnitName(val) {
+        await syncToSheet('update', { record_type: 'unit_config', unit_name: val.toUpperCase() });
+        showAutoSaveNotification('Sistem', 'Nama unit dikemaskini');
+    }
+
+    async function saveMeetingDate(num, val) {
+        meetingDatesRecord[`meeting_date_${num}`] = val;
+        await syncToSheet('update', meetingDatesRecord);
+        showAutoSaveNotification('Tarikh', `Tarikh P${num} disimpan`);
+    }
+
+    function loadMeetingDatesUI() {
+        for (let i = 1; i <= 12; i++) {
+            const input = document.querySelector(`.date-input[data-date="${i}"]`);
+            if (input && meetingDatesRecord[`meeting_date_${i}`]) input.value = meetingDatesRecord[`meeting_date_${i}`];
+        }
+    }
+
+    function updateYearCounts() {
+        [4, 5, 6].forEach(y => {
+            const count = studentsData.filter(s => s.year == y).length;
+            if(document.getElementById(`year${y}-count`)) document.getElementById(`year${y}-count`).textContent = count + ' murid';
+            if(document.getElementById(`student-list-year${y}-count`)) document.getElementById(`student-list-year${y}-count`).textContent = count + ' murid';
         });
-        document.getElementById('global-search-results').classList.remove('hidden');
     }
 
     function showAutoSaveNotification(title, msg) {
         const t = document.createElement('div');
         t.className = "fixed bottom-4 right-4 bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl z-[9999] animate-slide-in flex items-center gap-3";
-        t.innerHTML = `<div><p class="font-black text-sm">${title}</p><p class="text-[10px] opacity-80">${msg}</p></div>`;
+        t.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i><div><p class="font-black text-sm">${title}</p><p class="text-[10px] opacity-80">${msg}</p></div>`;
         document.body.appendChild(t);
+        lucide.createIcons();
         setTimeout(() => t.remove(), 3000);
     }
 
-    // PDF DENGAN LOGO IMGUR & FIX PERTINDANAN
+    // --- MODAL HELPERS ---
+    function openDeleteModalManual(name) {
+        studentToDelete = studentsData.find(s => s.name === name && s.year == studentListYear);
+        document.getElementById('delete-student-name').textContent = `Padam "${name}"?`;
+        document.getElementById('delete-modal').classList.remove('hidden');
+    }
+    function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
+    async function confirmDelete() {
+        if (document.getElementById('delete-pin-input').value !== PIN) { alert("PIN Salah!"); return; }
+        await syncToSheet('delete', studentToDelete);
+        closeDeleteModal();
+    }
+
+    function openDeleteAllModal() {
+        const count = studentsData.filter(s => s.year == studentListYear).length;
+        document.getElementById('delete-all-year').textContent = studentListYear;
+        document.getElementById('delete-all-modal').classList.remove('hidden');
+    }
+    function closeDeleteAllModal() { document.getElementById('delete-all-modal').classList.add('hidden'); }
+    async function confirmDeleteAll() {
+        if (document.getElementById('delete-all-pin-input').value !== PIN) { alert("PIN Salah!"); return; }
+        const targets = studentsData.filter(s => s.year == studentListYear);
+        toggleLoader(true);
+        for (const t of targets) await syncToSheet('delete', t);
+        closeDeleteAllModal();
+        toggleLoader(false);
+    }
+
+    // --- PDF GENERATORS (DENGAN LOGO) ---
+    const PDF_LOGO = "https://i.imgur.com/DLy3jZn.png";
+
     function generateAttendancePDF() {
-      const students = studentsData.filter(s => s.year == selectedYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
-      const dates = [];
-      for(let i=1;i<=12;i++){ const inp = document.querySelector(`.date-input[data-date="${i}"]`); dates.push(inp?.value ? inp.value.split('-').reverse().slice(0,2).join('/') : '-'); }
-      const rows = students.map((s, idx) => {
-          let c = ''; let cnt = 0;
-          for(let j=1;j<=12;j++){ const isP = s[`attendance_${j}`] === true || s[`attendance_${j}`] === 'true'; if(isP) cnt++; c+= `<td style="border:1px solid #000; text-align:center; background:${isP?'#d1fae5':'#fee2e2'}">${isP?'/':'O'}</td>`; }
-          return `<tr><td style="border:1px solid #000; text-align:center">${idx+1}</td><td style="border:1px solid #000; padding:5px">${s.name}</td><td style="border:1px solid #000; text-align:center">${s.class_name||'-'}</td>${c}<td style="border:1px solid #000; text-align:center; font-weight:bold">${cnt}</td></tr>`;
-      }).join('');
-      const html = `<html><head><style>table{width:100%; border-collapse:collapse; font-size:10px} th,td{border:1px solid #000; padding:4px}</style></head><body onload="window.print()">
-        <center><img src="https://i.imgur.com/DLy3jZn.png" style="width:100px"></center>
-        <h2 style="text-align:center">REKOD KEHADIRAN KOKURIKULUM 2026</h2>
-        <p style="text-align:center">${config.unit_name} - TAHUN ${selectedYear}</p>
-        <table><thead><tr><th>Bil</th><th>Nama</th><th>Kelas</th><th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>P6</th><th>P7</th><th>P8</th><th>P9</th><th>P10</th><th>P11</th><th>P12</th><th>Jum</th></tr>
-        <tr><th></th><th></th><th>Tarikh:</th>${dates.map(d=>`<th>${d}</th>`).join('')}<th></th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
-      const w = window.open(); w.document.write(html); w.document.close();
+        if (!selectedYear) return;
+        const students = studentsData.filter(s => s.year == selectedYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
+        const dates = [];
+        for(let i=1; i<=12; i++) {
+            const val = document.querySelector(`.date-input[data-date="${i}"]`).value;
+            dates.push(val ? val.split('-').reverse().slice(0,2).join('/') : '-');
+        }
+
+        const rows = students.map((s, idx) => {
+            let cells = ''; let count = 0;
+            for(let j=1; j<=12; j++) {
+                const isP = s[`attendance_${j}`] === true || s[`attendance_${j}`] === 'true';
+                if(isP) count++;
+                cells += `<td style="border:1px solid #000; text-align:center; background:${isP?'#d1fae5':'#fff'}">${isP?'/':''}</td>`;
+            }
+            return `<tr><td style="border:1px solid #000; text-align:center">${idx+1}</td><td style="border:1px solid #000; padding:4px">${s.name}</td><td style="border:1px solid #000; text-align:center">${s.class_name||'-'}</td>${cells}<td style="border:1px solid #000; text-align:center; font-weight:bold">${count}</td></tr>`;
+        }).join('');
+
+        const html = `<html><head><style>table{width:100%; border-collapse:collapse; font-family:Arial; font-size:9px} th,td{border:1px solid #000; padding:3px} th{background:#f2f2f2}</style></head><body onload="window.print()">
+            <div style="text-align:center; margin-bottom:15px"><img src="${PDF_LOGO}" style="width:80px"><h2 style="margin:5px 0; font-family:Arial Black">REKOD KEHADIRAN KOKURIKULUM 2026</h2><p style="font-family:Arial; font-weight:bold">${config.unit_name} (TAHUN ${selectedYear})</p></div>
+            <table><thead><tr><th>Bil</th><th>Nama</th><th>Kelas</th><th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>P6</th><th>P7</th><th>P8</th><th>P9</th><th>P10</th><th>P11</th><th>P12</th><th>Jum</th></tr>
+            <tr><th colspan="3">Tarikh:</th>${dates.map(d=>`<th>${d}</th>`).join('')}<th></th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+        const win = window.open('','_blank'); win.document.write(html); win.document.close();
     }
 
     function generateStudentListPDF() {
+        if (!studentListYear) return;
         const students = studentsData.filter(s => s.year == studentListYear).sort((a,b) => (a.class_name||"").localeCompare(b.class_name||"") || a.name.localeCompare(b.name));
         const rows = students.map((s, i) => `<tr><td style="border:1px solid #000; text-align:center">${i+1}</td><td style="border:1px solid #000; padding:8px">${s.name}</td><td style="border:1px solid #000; text-align:center">${s.class_name||'-'}</td></tr>`).join('');
-        const html = `<html><body onload="window.print()"><center><img src="https://i.imgur.com/DLy3jZn.png" style="width:100px"></center><h2 style="text-align:center">SENARAI AHLI UNIT KOKURIKULUM</h2><p style="text-align:center">${config.unit_name} - TAHUN ${studentListYear}</p><table border="1" style="width:100%; border-collapse:collapse"><thead><tr><th>Bil</th><th>Nama Murid</th><th>Kelas</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
-        const w = window.open(); w.document.write(html); w.document.close();
+        const html = `<html><head><style>table{width:100%; border-collapse:collapse; font-family:Arial} th,td{border:1px solid #000; padding:8px}</style></head><body onload="window.print()">
+            <div style="text-align:center; margin-bottom:20px"><img src="${PDF_LOGO}" style="width:100px"><h2>SENARAI AHLI UNIT KOKURIKULUM</h2><p style="font-weight:bold">${config.unit_name} - TAHUN ${studentListYear}</p></div>
+            <table><thead><tr><th width="50">Bil</th><th>Nama Murid</th><th width="150">Kelas</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+        const win = window.open('','_blank'); win.document.write(html); win.document.close();
     }
 
     function generateAnalyticsPDFForYear(y) {
@@ -646,14 +759,13 @@
         for (let i = 1; i <= 12; i++) {
             let p = 0; filtered.forEach(s => { if(s[`attendance_${i}`] === true || s[`attendance_${i}`] === 'true') p++; });
             const per = filtered.length > 0 ? Math.round((p/filtered.length)*100) : 0;
-            rows += `<tr><td style="text-align:center">${i}</td><td style="text-align:center">${p}</td><td style="text-align:center">${filtered.length - p}</td><td style="text-align:center; font-weight:bold">${per}%</td></tr>`;
+            rows += `<tr><td style="text-align:center; border:1px solid #000; padding:8px">${i}</td><td style="text-align:center; border:1px solid #000">${p}</td><td style="text-align:center; border:1px solid #000">${filtered.length - p}</td><td style="text-align:center; border:1px solid #000; font-weight:bold">${per}%</td></tr>`;
         }
-        const html = `<html><body onload="window.print()"><center><img src="https://i.imgur.com/DLy3jZn.png" style="width:100px"></center><h2 style="text-align:center">ANALISA KEHADIRAN TAHUN ${y}</h2><p style="text-align:center">${config.unit_name}</p><table border="1" style="width:100%; border-collapse:collapse"><thead><tr><th>Perjumpaan</th><th>Hadir</th><th>Tidak Hadir</th><th>Peratus</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
-        const w = window.open(); w.document.write(html); w.document.close();
+        const html = `<html><body onload="window.print()">
+            <div style="text-align:center; margin-bottom:20px"><img src="${PDF_LOGO}" style="width:100px"><h2>ANALISA KEHADIRAN</h2><p style="font-weight:bold">${config.unit_name} (TAHUN ${y})</p></div>
+            <table style="width:100%; border-collapse:collapse; font-family:Arial"><thead><tr style="background:#f2f2f2"><th style="border:1px solid #000; padding:8px">Perjumpaan</th><th style="border:1px solid #000">Hadir</th><th style="border:1px solid #000">Tidak Hadir</th><th style="border:1px solid #000">Peratus</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+        const win = window.open('','_blank'); win.document.write(html); win.document.close();
     }
-
-    function generateComprehensiveReport(y) { generateAttendancePDF(); }
-    document.addEventListener('DOMContentLoaded', initializeApp);
   </script>
 </body>
 </html>
