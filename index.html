@@ -47,8 +47,8 @@
             <i data-lucide="users" class="text-white w-6 h-6"></i>
           </div>
           <div>
-            <h1 class="font-extrabold text-indigo-950 tracking-tight">SEKOLAH KEBANGSAAN BANDAR TUN HUSSEIN ONN 2</h1>
-            <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest">PENGURUSAN UNIT KOKURIKULUM</p>
+            <h1 class="font-extrabold text-indigo-950 tracking-tight">PENGURUSAN UNIT KOKURIKULUM</h1>
+            <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest">SK BANDAR TUN HUSSEIN ONN 2</p>
           </div>
         </div>
         <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
@@ -182,7 +182,7 @@
                                 <th class="px-2 py-4 text-center">Kelas</th>
                                 <script>
                                     for(let i=1;i<=12;i++){
-                                        document.write(`<th class="px-1 py-4 text-center min-w-[50px]">P${i}<br><button onclick="tickAllForMeeting(${i})" class="text-[8px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 mt-1 uppercase">/ Smua</button></th>`);
+                                        document.write(`<th class="px-1 py-4 text-center min-w-[50px]">P${i}<br><button onclick="tickAllForMeeting(${i})" class="text-[8px] bg-indigo-500 text-white px-1 rounded hover:bg-indigo-600 mt-1 uppercase">/ Semua</button></th>`);
                                     }
                                 </script>
                                 <th class="px-4 py-4 text-center bg-indigo-50 font-black">Jum</th>
@@ -388,6 +388,7 @@ console.log("Rekod Tarikh Ditemui:", meetingDatesRecord); // Untuk semakan di Co
         const data = { name, year: studentListYear, class_name: cls, record_type: 'student' };
         for(let i=1; i<=12; i++) data[`attendance_${i}`] = false;
         await syncToSheet('create', data, document.getElementById('add-student-list-btn'));
+        showAutoSaveNotification('Berjaya', `${name} telah ditambah.`);
         document.getElementById('student-list-name-input').value = '';
         document.getElementById('student-list-class-input').value = '';
     }
@@ -412,6 +413,7 @@ console.log("Rekod Tarikh Ditemui:", meetingDatesRecord); // Untuk semakan di Co
         closeBulkUploadStudentListModal();
         document.getElementById('bulk-student-list-names-input').value = '';
         toggleLoader(false);
+        showAutoSaveNotification('Pukal Selesai', `${lines.length} murid telah dimasukkan.`);
     }
 
     // --- Attendance Logics ---
