@@ -36,44 +36,37 @@
         .table-container { position: relative; }
         @media (max-width: 768px) { .table-container::after { content: '→'; position: absolute; right: 10px; top: 50%; opacity: 0.3; font-weight: bold; animation: nudge 2s infinite; display: block; } }
         @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
-        /* --- PAPARAN DI WEB --- */
+/* Paparan di Web (Bawah sekali) */
 .footer-koku {
     width: 100%;
     padding: 20px 0;
     text-align: center;
-    border-top: 1px solid rgba(0,0,0,0.1);
-    margin-top: 30px;
-    /* Guna warna hitam seperti anda minta sebelum ini */
-    color: #000000; 
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-size: 10px;
+    color: #000000; /* Warna hitam di web */
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.1em;
 }
 
-/* --- PAPARAN DI PDF (PRINT) --- */
+/* Paparan di PDF (Melekat di setiap helaian) */
 @media print {
     .footer-koku {
-        position: fixed !important;
+        display: block !important;
+        position: fixed !important; 
         bottom: 0 !important;
         left: 0;
         right: 0;
+        text-align: center !important;
         border-top: 1px solid #000 !important;
-        background-color: white !important;
         padding: 10px 0 !important;
-        color: black !important;
-        display: block !important;
-        z-index: 9999 !important; /* Tambah ini supaya footer sentiasa di depan */
-    }
-
-    body {
-        margin-bottom: 80px !important; /* Tambah margin lebih sikit supaya selamat */
         background-color: white !important;
-        -webkit-print-color-adjust: exact; /* Paksa warna keluar */
+        color: black !important;
+        font-size: 10pt !important;
+        z-index: 9999;
     }
 
-    nav, button, .no-print, .search-container, .loading-overlay {
-        display: none !important;
+    /* Beri ruang supaya data murid tak kena tutup dengan footer */
+    body {
+        margin-bottom: 50px !important;
     }
 }
     </style>
