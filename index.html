@@ -713,9 +713,20 @@ function generateAttendancePDF() {
     </body>
     </html>`;
 
-    const win = window.open('','_blank'); 
+const win = window.open('', '_blank'); 
     win.document.write(html);
+    
+    // JANGAN UBAH DI ATAS. HANYA TAMBAH LOGIK DI BAWAH INI:
+    
+    // document.close() memberitahu browser bahawa data sudah habis dihantar
     win.document.close();
+
+    // Seterusnya, kita paksa window tersebut untuk fokus dan tunggu render
+    // 1000ms (1 saat) adalah masa selamat untuk Chrome 'melukis' baris no 39
+    setTimeout(() => {
+        win.focus();
+        win.print();
+    }, 1000);
 }
 
     function generateStudentListPDF() {
