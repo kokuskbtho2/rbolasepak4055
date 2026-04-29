@@ -537,13 +537,37 @@ tr.innerHTML = `
         await syncToSheet('update', s, btn);
     }
 
-    async function tickAllForMeeting(num) {
-        if(!confirm(`Hadir semua murid P${num}?`)) return;
-        toggleLoader(true);
-        const targets = studentsData.filter(s => s.year == selectedYear);
-        for (const s of targets) { s[`attendance_${num}`] = true; await syncToSheet('update', s); }
-        toggleLoader(false);
-    }
+    function selectAllForYear(year, isChecked) {
+    // 1. Tunjukkan loading cursor supaya cikgu tahu sistem tengah proses
+    document.body.style.cursor = 'wait';
+
+    // 2. Gunakan setTimeout 0ms untuk beri ruang browser "bernafas"
+    setTimeout(() => {
+        // Tapis murid mengikut tahun
+        const studentsToUpdate = studentsData.filter(s => s.year == year);
+
+        studentsToUpdate.forEach(student => {
+            for (let i = 1; i <= 12; i++) {
+                // Kemas kini data dalam memori (Laju)
+                student[`attendance_${i}`] = isChecked;
+                
+                // Cari checkbox di skrin
+                const cb = document.querySelector(`input[data-student-id="${student.id}"][data-index="${i}"]`);
+                if (cb) {
+                    cb.checked = isChecked; // Kemas kini paparan
+                }
+            }
+        });
+
+        // 3. Kemas kini jumlah (Jum) bagi setiap murid secara pukal
+        updateAllTotalPresent();
+
+        // 4. Kembalikan cursor asal
+        document.body.style.cursor = 'default';
+        
+        console.log("Kemas kini selesai!");
+    }, 50);
+}
 
     // --- Search & Other Functions ---
     function updateAnalytics() {
