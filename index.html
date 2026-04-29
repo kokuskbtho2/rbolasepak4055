@@ -528,14 +528,32 @@ tr.innerHTML = `
         });
     }
 
-    async function toggleAttendanceManual(name, num, btn) {
-        const s = studentsData.find(x => x.name === name && x.year == selectedYear);
-        const key = `attendance_${num}`;
-        const newState = !(s[key] === true || s[key] === 'true');
-        s[key] = newState;
-        btn.classList.toggle('bg-emerald-500', newState); btn.classList.toggle('border-emerald-500', newState); btn.classList.toggle('text-white', newState); btn.textContent = newState ? '/' : 'O';
-        await syncToSheet('update', s, btn);
-    }
+    function toggleAttendance(studentId, num, isChecked) {
+    // 1. Cari murid dalam data memori
+    const student = studentsData.find(s => s.id == studentId);
+    if (!student) return;
+
+    // 2. Kemas kini data dalam memori (Serta-merta)
+    student[`attendance_${num}`] = isChecked;
+
+    // 3. Kemas kini paparan JUMLAH (Jum) di hujung baris secara manual
+    // Supaya cikgu nampak angka berubah tanpa tunggu loading
+    updateRowTotal(studentId);
+
+    // 4. SIMPAN KE GOOGLE SHEETS (Di belakang tab)
+    // Perhatikan: TIADA kata kunci 'await' di depan syncToSheet
+    // Ini supaya browser terus "jalan" tanpa tunggu respon server
+    syncToSheet('update', student)
+        .then(() => {
+            console.log("Berjaya simpan!");
+        })
+        .catch(err => {
+            alert("Gagal simpan ke awan. Sila semak internet!");
+            // Jika gagal, kita patahkan balik tick tadi
+            student[`attendance_${num}`] = !isChecked;
+            renderTable(); 
+        });
+}
 
     async function tickAllForMeeting(num) {
     if(!selectedYear) return;
