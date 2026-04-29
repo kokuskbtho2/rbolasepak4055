@@ -539,51 +539,46 @@ tr.innerHTML = `
 
     async function tickAllForMeeting(num) {
     if(!selectedYear) return;
-    if(!confirm(`Tanda HADIR semua murid Tahun ${selectedYear} untuk P${num}?`)) return;
+    if(!confirm(`Hadir semua murid Tahun ${selectedYear} untuk P${num}?`)) return;
 
-    toggleLoader(true); // Tunjukkan loading
+    toggleLoader(true);
 
     try {
+        // 1. Tapis murid
         const targets = studentsData.filter(s => s.year == selectedYear);
         
-        // 1. Kemas kini semua data dalam memori & paparan dulu (Sangat Laju)
+        // 2. Kemas kini data dalam memori sahaja dulu (Sangat Laju)
         targets.forEach(s => {
             s[`attendance_${num}`] = true;
-            
-            // Kemas kini checkbox di skrin secara visual
-            const cb = document.querySelector(`input[data-student-id="${s.id}"][data-index="${num}"]`);
-            if (cb) cb.checked = true;
         });
 
-        // 2. Kemas kini JUMLAH hadir di skrin
+        // 3. PAKSA JADUAL LUKIS SEMULA
+        // Kita panggil fungsi yang cikgu guna untuk paparkan senarai murid
+        // Biasanya nama fungsi ini 'renderTable()' atau 'showStudents()'
         if (typeof renderTable === 'function') {
-            renderTable(); // Jika cikgu ada fungsi refresh table, panggil di sini
+            renderTable(); 
+        } else {
+            // Jika tak tahu nama fungsi, kita buat cara manual yang paling selamat
+            const allCheckboxes = document.querySelectorAll(`input[type="checkbox"]`);
+            allCheckboxes.forEach(cb => {
+                // Cari checkbox yang sepadan dengan perjumpaan (P) tersebut
+                if(cb.getAttribute('onclick') && cb.getAttribute('onclick').includes(`, ${num})`)) {
+                    cb.checked = true;
+                }
+            });
         }
 
-        // 3. SIMPAN DATA KE GOOGLE SHEETS
-        // Kita hantar SEMUA data murid yang berubah dalam satu arahan (jika script sokong)
-        // Jika script cikgu hanya sokong satu-satu, kita hantar secara 'Promise.all' (Serentak)
+        // 4. SIMPAN KE GOOGLE SHEETS (Secara Serentak/Async)
+        // Kita tak guna 'await' di dalam loop supaya tak tunggu satu-satu
         const savePromises = targets.map(s => syncToSheet('update', s));
-        
-        await Promise.all(savePromises); 
+        await Promise.all(savePromises);
 
-        alert(`Selesai! Semua murid P${num} telah ditanda hadir.`);
+        alert(`Berjaya! Semua murid P${num} telah ditanda hadir.`);
     } catch (error) {
-        console.error("Gagal simpan data:", error);
-        alert("Ada masalah semasa menyimpan data. Sila cuba lagi.");
+        console.error("Ralat simpan:", error);
     } finally {
-        toggleLoader(false); // Tutup loading
+        toggleLoader(false);
     }
-}
-
-        // 3. Kemas kini jumlah (Jum) bagi setiap murid secara pukal
-        updateAllTotalPresent();
-
-        // 4. Kembalikan cursor asal
-        document.body.style.cursor = 'default';
-        
-        console.log("Kemas kini selesai!");
-    }, 50);
 }
 
     // --- Search & Other Functions ---
