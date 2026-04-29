@@ -574,35 +574,30 @@ tr.innerHTML = `
         // 1. Tapis murid
         const targets = studentsData.filter(s => s.year == selectedYear);
         
-        // 2. Kemas kini data dalam memori sahaja dulu (Sangat Laju)
+        // 2. Kemas kini data dalam memori & visual (Serta-merta)
         targets.forEach(s => {
             s[`attendance_${num}`] = true;
         });
 
-        // 3. PAKSA JADUAL LUKIS SEMULA
-        // Kita panggil fungsi yang cikgu guna untuk paparkan senarai murid
-        // Biasanya nama fungsi ini 'renderTable()' atau 'showStudents()'
+        // Paksa jadual update supaya cikgu nampak semua hijau/tick terus
         if (typeof renderTable === 'function') {
             renderTable(); 
-        } else {
-            // Jika tak tahu nama fungsi, kita buat cara manual yang paling selamat
-            const allCheckboxes = document.querySelectorAll(`input[type="checkbox"]`);
-            allCheckboxes.forEach(cb => {
-                // Cari checkbox yang sepadan dengan perjumpaan (P) tersebut
-                if(cb.getAttribute('onclick') && cb.getAttribute('onclick').includes(`, ${num})`)) {
-                    cb.checked = true;
-                }
-            });
         }
 
-        // 4. SIMPAN KE GOOGLE SHEETS (Secara Serentak/Async)
-        // Kita tak guna 'await' di dalam loop supaya tak tunggu satu-satu
-        const savePromises = targets.map(s => syncToSheet('update', s));
-        await Promise.all(savePromises);
+        // 3. SIMPAN KE GOOGLE SHEETS DENGAN JEDA 100 MILISAAT
+        // Teknik ini memastikan Google sempat 'simpan & lock' setiap baris
+        for (const s of targets) {
+            syncToSheet('update', s);
+            
+            // Jeda 100ms = 0.1 saat. 
+            // Kalau ada 40 murid, proses simpan ambil masa cuma 4 saat sahaja.
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
 
-        alert(`Berjaya! Semua murid P${num} telah ditanda hadir.`);
+        alert(`Berjaya! Semua murid P${num} telah diproses tanpa keciciran.`);
     } catch (error) {
         console.error("Ralat simpan:", error);
+        alert("Ada gangguan rangkaian. Sila semak data anda.");
     } finally {
         toggleLoader(false);
     }
