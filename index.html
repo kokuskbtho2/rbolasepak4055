@@ -547,29 +547,52 @@ tr.innerHTML = `
 let isSyncing = {};
 
 // 1. FUNGSI TICK SATU-SATU (MANUAL)
-function toggleAttendanceManual(name, num, btn) {
+async function toggleAttendanceManual(name, num, btn) {
     const s = studentsData.find(x => x.name === name && x.year == selectedYear);
     if (!s) return;
 
     const key = `attendance_${num}`;
     const newState = !(s[key] === true || s[key] === 'true');
     
+    // 1. KEMAS KINI DATA MEMORI
     s[key] = newState;
 
-    // Visual Instant
+    // 2. VISUAL SEMENTARA (SEDANG PROSES)
     btn.style.transition = 'none'; 
     if (newState) {
-        btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
-        btn.textContent = '/';
+        // Jika nak TICK: Tukar jadi BIRU dulu (Tanda sedang simpan)
+        btn.className = "w-8 h-8 rounded-full border-2 bg-blue-500 border-blue-500 text-white flex items-center justify-center font-bold";
+        btn.textContent = '...';
     } else {
-        btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
-        btn.textContent = 'O';
+        // Jika nak UNTICK: Tukar jadi KUNING dulu (Tanda sedang simpan)
+        btn.className = "w-8 h-8 rounded-full border-2 bg-yellow-400 border-yellow-400 text-white flex items-center justify-center font-bold";
+        btn.textContent = '...';
     }
 
-    // UPDATE JUMLAH DI SKRIN (Cari elemen jumlah dan tukar angkanya terus)
-    updateRowTotalVisual(s);
+    try {
+        // 3. HANTAR KE GOOGLE SHEETS (Guna AWAIT di sini supaya warna bertukar SELEPAS berjaya)
+        await syncToSheet('update', s, btn);
 
-    syncToSheet('update', s, btn);
+        // 4. VISUAL AKHIR (BERJAYA SIMPAN)
+        if (newState) {
+            // Jadi HIJAU pekat
+            btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
+            btn.textContent = '/';
+        } else {
+            // Jadi PUTIH bersih
+            btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
+            btn.textContent = 'O';
+        }
+        
+        // Update jumlah (Jum) di hujung baris
+        updateRowTotalVisual(s);
+
+    } catch (err) {
+        // Jika gagal, patahkan balik warna ke asal atau beri amaran merah
+        btn.className = "w-8 h-8 rounded-full border-2 bg-red-600 border-red-600 text-white flex items-center justify-center font-bold";
+        btn.textContent = '!';
+        alert("Gagal simpan! Sila semak internet.");
+    }
 }
 
 // 2. FUNGSI TICK SEMUA
