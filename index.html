@@ -531,88 +531,90 @@ tr.innerHTML = `
     // Guna pembolehubah global (di luar fungsi) untuk simpan status "tengah simpan"
 let isSyncing = {};
 
+// 1. FUNGSI TICK SATU-SATU (MANUAL)
 function toggleAttendanceManual(name, num, btn) {
     const s = studentsData.find(x => x.name === name && x.year == selectedYear);
     if (!s) return;
 
     const key = `attendance_${num}`;
-    // Tentukan status baru
     const newState = !(s[key] === true || s[key] === 'true');
     
-    // 1. KEMAS KINI DATA MEMORI (Instant)
     s[key] = newState;
 
-    // 2. PAKSA PERUBAHAN VISUAL (Instant & No Animation)
-    btn.style.transition = 'none'; // Matikan animasi CSS
-    
+    // Visual Instant
+    btn.style.transition = 'none'; 
     if (newState) {
-        // Gaya HADIR (Hijau Pekat)
         btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
         btn.textContent = '/';
     } else {
-        // Gaya TIDAK HADIR (Putih/Kelabu Kosong)
-        // Kita paksa warna border gray-300 dan background putih terus
         btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
         btn.textContent = 'O';
     }
 
-    // 3. SIMPAN DI BELAKANG TAB
-    // Tanpa 'await', supaya cikgu boleh klik murid seterusnya terus
+    // UPDATE JUMLAH DI SKRIN (Cari elemen jumlah dan tukar angkanya terus)
+    updateRowTotalVisual(s);
+
     syncToSheet('update', s, btn);
 }
 
-    async function tickAllForMeeting(num) {
+// 2. FUNGSI TICK SEMUA
+async function tickAllForMeeting(num) {
     if(!selectedYear) return;
     if(!confirm(`Hadir semua murid P${num}?`)) return;
 
-    // 1. TUKAR VISUAL SEMUA SERENTAK (Gila Laju)
-    // Kita cari semua butang yang mewakili perjumpaan (P) tersebut
     const allButtons = document.querySelectorAll(`button[onclick*=", ${num}, this"]`);
-    
     allButtons.forEach(btn => {
         btn.style.transition = 'none';
         btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
         btn.textContent = '/';
     });
 
-    // 2. KEMAS KINI DATA DALAM MEMORI
     const targets = studentsData.filter(s => s.year == selectedYear);
-    targets.forEach(s => { s[`attendance_${num}`] = true; });
+    targets.forEach(s => { 
+        s[`attendance_${num}`] = true; 
+        updateRowTotalVisual(s); // Kemas kini angka 'Jum' setiap murid
+    });
 
-    // 3. SIMPAN KE GOOGLE SHEETS (Secara Senyap & Beratur)
-    // Kita tak pakai Loader supaya cikgu tak rasa sistem tersekat
-    // Cukup sekadar tunjuk satu nota kecil atau console log
-    console.log("Sedang menyimpan data ke awan...");
-    
     for (const s of targets) {
         syncToSheet('update', s);
-        await new Promise(r => setTimeout(r, 50)); // Jeda kecil 0.05s supaya tak keciciran
+        await new Promise(r => setTimeout(r, 50)); 
     }
-    
     alert("Semua murid telah ditanda hadir!");
 }
-      async function untickAllForMeeting(num) {
+
+// 3. FUNGSI UNTICK SEMUA
+async function untickAllForMeeting(num) {
     if(!selectedYear) return;
     if(!confirm(`Kosongkan semua kehadiran P${num}?`)) return;
 
-    // 1. TUKAR SEMUA BUTANG JADI KOSONG SERENTAK
     const allButtons = document.querySelectorAll(`button[onclick*=", ${num}, this"]`);
-    
     allButtons.forEach(btn => {
         btn.style.transition = 'none';
         btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
         btn.textContent = 'O';
     });
 
-    // 2. KEMAS KINI DATA MEMORI
     const targets = studentsData.filter(s => s.year == selectedYear);
-    targets.forEach(s => { s[`attendance_${num}`] = false; });
+    targets.forEach(s => { 
+        s[`attendance_${num}`] = false; 
+        updateRowTotalVisual(s); // Kemas kini angka 'Jum' setiap murid
+    });
 
-    // 3. SIMPAN KE GOOGLE SHEETS (Beratur di belakang tab)
     for (const s of targets) {
         syncToSheet('update', s);
-        await new Promise(r => setTimeout(r, 50)); // Jeda 0.05s untuk kestabilan Google
+        await new Promise(r => setTimeout(r, 50)); 
     }
+}
+
+// FUNGSI TAMBAHAN: Supaya angka Jumlah (Jum) pun laju berubah
+function updateRowTotalVisual(student) {
+    let total = 0;
+    for (let i = 1; i <= 12; i++) {
+        if (student[`attendance_${i}`] === true || student[`attendance_${i}`] === 'true') total++;
+    }
+    // Cari kotak jumlah di skrin guna ID (Pastikan cikgu letak id pada kolum 'Jum' masa renderTable)
+    const totalElement = document.getElementById(`total-${student.name.replace(/\s+/g, '-')}`);
+    if (totalElement) totalElement.textContent = total;
 }
 
     // --- Search & Other Functions ---
