@@ -547,54 +547,49 @@ tr.innerHTML = `
 let isSyncing = {};
 
 // 1. FUNGSI TICK SATU-SATU (MANUAL)
-async function toggleAttendanceManual(name, num, btn) {
+// Simpan status proses supaya tidak bertindih
+let processingState = {}; 
+
+function toggleAttendanceManual(name, num, btn) {
     const s = studentsData.find(x => x.name === name && x.year == selectedYear);
     if (!s) return;
 
     const key = `attendance_${num}`;
     const newState = !(s[key] === true || s[key] === 'true');
     
-    // 1. KEMAS KINI DATA MEMORI
+    // 1. KEMAS KINI DATA MEMORI (Serta-merta)
     s[key] = newState;
 
-    // 2. VISUAL SEMENTARA (SEDANG PROSES)
+    // 2. TUKAR VISUAL PROSES (Instant - Biru/Kuning)
     btn.style.transition = 'none'; 
     if (newState) {
-        // Jika nak TICK: Tukar jadi BIRU dulu (Tanda sedang simpan)
+        // Sedang Simpan Hadir -> BIRU
         btn.className = "w-8 h-8 rounded-full border-2 bg-blue-500 border-blue-500 text-white flex items-center justify-center font-bold";
-        btn.textContent = '...';
+        btn.textContent = "...";
     } else {
-        // Jika nak UNTICK: Tukar jadi KUNING dulu (Tanda sedang simpan)
+        // Sedang Simpan Tidak Hadir -> KUNING
         btn.className = "w-8 h-8 rounded-full border-2 bg-yellow-400 border-yellow-400 text-white flex items-center justify-center font-bold";
-        btn.textContent = '...';
+        btn.textContent = "...";
     }
 
-    try {
-        // 3. HANTAR KE GOOGLE SHEETS (Guna AWAIT di sini supaya warna bertukar SELEPAS berjaya)
-        await syncToSheet('update', s, btn);
-
-        // 4. VISUAL AKHIR (BERJAYA SIMPAN)
-        if (newState) {
-            // Jadi HIJAU pekat
+    // 3. HANTAR KE GOOGLE (Tanpa 'await' supaya cikgu boleh klik murid lain terus!)
+    // Kita guna .then() supaya bila siap baru dia tukar ke Hijau/Putih
+    syncToSheet('update', s, btn).then(() => {
+        // 4. BILA DAH SIAP SIMPAN, BARU TUKAR WARNA AKHIR
+        if (s[key] === true || s[key] === 'true') {
             btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
-            btn.textContent = '/';
+            btn.textContent = "/";
         } else {
-            // Jadi PUTIH bersih
             btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
-            btn.textContent = 'O';
+            btn.textContent = "O";
         }
-        
-        // Update jumlah (Jum) di hujung baris
-        updateRowTotalVisual(s);
-
-    } catch (err) {
-        // Jika gagal, patahkan balik warna ke asal atau beri amaran merah
+        updateRowTotalVisual(s); // Kemas kini jumlah 'Jum'
+    }).catch(err => {
+        // Jika Error (Internet Mati)
         btn.className = "w-8 h-8 rounded-full border-2 bg-red-600 border-red-600 text-white flex items-center justify-center font-bold";
-        btn.textContent = '!';
-        alert("Gagal simpan! Sila semak internet.");
-    }
+        btn.textContent = "!";
+    });
 }
-
 // 2. FUNGSI TICK SEMUA
 async function tickAllForMeeting(num) {
     if(!selectedYear) return;
