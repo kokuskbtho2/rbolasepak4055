@@ -531,81 +531,87 @@ tr.innerHTML = `
     // Guna pembolehubah global (di luar fungsi) untuk simpan status "tengah simpan"
 let isSyncing = {};
 
-async function toggleAttendanceManual(name, num, btn) {
+function toggleAttendanceManual(name, num, btn) {
     const s = studentsData.find(x => x.name === name && x.year == selectedYear);
     if (!s) return;
 
     const key = `attendance_${num}`;
+    // Tentukan status baru
     const newState = !(s[key] === true || s[key] === 'true');
     
-    // 1. UPDATE VISUAL SERTA-MERTA (Tak perlu tunggu apa-apa)
-    s[key] = newState; // Kemas kini memori
-    
-    // Tukar warna butang terus
-    btn.classList.toggle('bg-emerald-500', newState); 
-    btn.classList.toggle('border-emerald-500', newState); 
-    btn.classList.toggle('text-white', newState); 
-    btn.textContent = newState ? '/' : 'O';
+    // 1. KEMAS KINI DATA MEMORI (Instant)
+    s[key] = newState;
 
-    // 2. DEBOUNCING / JEDA SIMPAN (Teknik Rahsia)
-    // Jika guru klik laju-laju, kita batalkan simpanan yang lama, ambil yang paling akhir sahaja
-    const syncKey = `${name}_${num}`;
-    if (isSyncing[syncKey]) {
-        clearTimeout(isSyncing[syncKey]);
+    // 2. PAKSA PERUBAHAN VISUAL (Instant & No Animation)
+    btn.style.transition = 'none'; // Matikan animasi CSS
+    
+    if (newState) {
+        // Gaya HADIR (Hijau Pekat)
+        btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
+        btn.textContent = '/';
+    } else {
+        // Gaya TIDAK HADIR (Putih/Kelabu Kosong)
+        // Kita paksa warna border gray-300 dan background putih terus
+        btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
+        btn.textContent = 'O';
     }
 
-    // Beri masa 500ms (0.5 saat) selepas klik terakhir baru hantar ke Google Sheets
-    isSyncing[syncKey] = setTimeout(async () => {
-        try {
-            // Hantar ke Google Sheets tanpa AWAIT di depan (biar dia jalan belakang tab)
-            syncToSheet('update', s, btn).then(() => {
-                delete isSyncing[syncKey];
-                console.log(`Data ${name} tersimpan.`);
-            });
-        } catch (err) {
-            console.error("Gagal simpan:", err);
-            // Hanya kalau betul-betul gagal total baru kita bagi amaran
-            alert("Internet tidak stabil. Sila semak tanda tanda tadi.");
-        }
-    }, 500); 
+    // 3. SIMPAN DI BELAKANG TAB
+    // Tanpa 'await', supaya cikgu boleh klik murid seterusnya terus
+    syncToSheet('update', s, btn);
 }
 
     async function tickAllForMeeting(num) {
     if(!selectedYear) return;
-    if(!confirm(`Hadir semua murid Tahun ${selectedYear} untuk P${num}?`)) return;
+    if(!confirm(`Hadir semua murid P${num}?`)) return;
 
-    toggleLoader(true);
+    // 1. TUKAR VISUAL SEMUA SERENTAK (Gila Laju)
+    // Kita cari semua butang yang mewakili perjumpaan (P) tersebut
+    const allButtons = document.querySelectorAll(`button[onclick*=", ${num}, this"]`);
+    
+    allButtons.forEach(btn => {
+        btn.style.transition = 'none';
+        btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
+        btn.textContent = '/';
+    });
 
-    try {
-        // 1. Tapis murid
-        const targets = studentsData.filter(s => s.year == selectedYear);
-        
-        // 2. Kemas kini data dalam memori & visual (Serta-merta)
-        targets.forEach(s => {
-            s[`attendance_${num}`] = true;
-        });
+    // 2. KEMAS KINI DATA DALAM MEMORI
+    const targets = studentsData.filter(s => s.year == selectedYear);
+    targets.forEach(s => { s[`attendance_${num}`] = true; });
 
-        // Paksa jadual update supaya cikgu nampak semua hijau/tick terus
-        if (typeof renderTable === 'function') {
-            renderTable(); 
-        }
+    // 3. SIMPAN KE GOOGLE SHEETS (Secara Senyap & Beratur)
+    // Kita tak pakai Loader supaya cikgu tak rasa sistem tersekat
+    // Cukup sekadar tunjuk satu nota kecil atau console log
+    console.log("Sedang menyimpan data ke awan...");
+    
+    for (const s of targets) {
+        syncToSheet('update', s);
+        await new Promise(r => setTimeout(r, 50)); // Jeda kecil 0.05s supaya tak keciciran
+    }
+    
+    alert("Semua murid telah ditanda hadir!");
+}
+      async function untickAllForMeeting(num) {
+    if(!selectedYear) return;
+    if(!confirm(`Kosongkan semua kehadiran P${num}?`)) return;
 
-        // 3. SIMPAN KE GOOGLE SHEETS DENGAN JEDA 100 MILISAAT
-        // Teknik ini memastikan Google sempat 'simpan & lock' setiap baris
-        for (const s of targets) {
-            syncToSheet('update', s);
-            
-            // Jeda 100ms = 0.1 saat. 
-            // Kalau ada 40 murid, proses simpan ambil masa cuma 4 saat sahaja.
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
+    // 1. TUKAR SEMUA BUTANG JADI KOSONG SERENTAK
+    const allButtons = document.querySelectorAll(`button[onclick*=", ${num}, this"]`);
+    
+    allButtons.forEach(btn => {
+        btn.style.transition = 'none';
+        btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
+        btn.textContent = 'O';
+    });
 
-        alert(`Berjaya! Semua murid P${num} telah diproses tanpa keciciran.`);
-    } catch (error) {
-        console.error("Ralat simpan:", error);
-        alert("Ada gangguan rangkaian. Sila semak data anda.");
-    } finally {
-        toggleLoader(false);
+    // 2. KEMAS KINI DATA MEMORI
+    const targets = studentsData.filter(s => s.year == selectedYear);
+    targets.forEach(s => { s[`attendance_${num}`] = false; });
+
+    // 3. SIMPAN KE GOOGLE SHEETS (Beratur di belakang tab)
+    for (const s of targets) {
+        syncToSheet('update', s);
+        await new Promise(r => setTimeout(r, 50)); // Jeda 0.05s untuk kestabilan Google
     }
 }
 
