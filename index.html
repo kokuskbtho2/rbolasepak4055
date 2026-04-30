@@ -242,26 +242,27 @@
 
             <div class="bg-white rounded-2xl p-6 border border-slate-100">
                 <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
-                    <script>
-                      document.write(`
-        <th class="px-1 py-3 text-center min-w-[70px] bg-slate-50 border-x border-slate-100">
-            <div class="flex flex-col items-center gap-1">
-                <span class="text-xs font-bold text-slate-600">P${i}</span>
-                
-                <button onclick="tickAllForMeeting(${i})" 
-                        class="w-full text-[9px] bg-emerald-500 text-white py-1 px-1 rounded shadow-sm hover:bg-emerald-600 uppercase font-bold leading-tight">
-                    Semua
-                </button>
-                
-                <button onclick="untickAllForMeeting(${i})" 
-                        class="w-full text-[9px] bg-red-100 text-red-600 py-1 px-1 rounded border border-red-200 hover:bg-red-500 hover:text-white uppercase font-bold leading-tight">
-                    Reset
-                </button>
-            </div>
-        </th>
-    `);
-}
-                    </script>
+ <script>
+    for (let i = 1; i <= 12; i++) {
+        document.write(`
+            <th class="px-1 py-3 text-center min-w-[75px] bg-slate-50 border-x border-slate-100">
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-[10px] font-bold text-slate-600">P${i}</span>
+                    
+                    <button onclick="tickAllForMeeting(${i})" 
+                            class="w-full text-[9px] bg-emerald-500 text-white py-1 px-1 rounded shadow-sm hover:bg-emerald-600 uppercase font-bold">
+                        Semua
+                    </button>
+                    
+                    <button onclick="untickAllForMeeting(${i})" 
+                            class="w-full text-[9px] bg-red-100 text-red-600 py-1 px-1 rounded border border-red-200 hover:bg-red-500 hover:text-white uppercase font-bold">
+                        Reset
+                    </button>
+                </div>
+            </th>
+        `);
+    }
+</script>
                 </div>
             </div>
 
