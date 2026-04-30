@@ -487,6 +487,16 @@ console.log("Rekod Tarikh Ditemui:", meetingDatesRecord); // Untuk semakan di Co
         document.getElementById('student-list-class-input').value = '';
     }
 
+      function setBtnStatus(btn, status) {
+    if (!btn) return;
+    if (status === 'loading-tick') {
+        btn.className = "w-7 h-7 rounded-full border-2 bg-blue-500 border-blue-500 text-white flex items-center justify-center font-bold animate-pulse";
+        btn.textContent = "...";
+    } else if (status === 'loading-untick') {
+        btn.className = "w-7 h-7 rounded-full border-2 bg-yellow-400 border-yellow-400 text-white flex items-center justify-center font-bold animate-pulse";
+        btn.textContent = "...";
+    }
+}
     function openBulkUploadModal() { document.getElementById('bulk-upload-student-list-modal').classList.remove('hidden'); }
     function closeBulkUploadStudentListModal() { document.getElementById('bulk-upload-student-list-modal').classList.add('hidden'); }
     
@@ -550,29 +560,31 @@ tr.innerHTML = `
 let isSyncing = {};
 
 // 1. FUNGSI TICK SATU-SATU (MANUAL)
-function toggleAttendanceManual(name, num, btn) {
+async function toggleAttendanceManual(name, num, btn) {
     const s = studentsData.find(x => x.name === name && x.year == selectedYear);
     if (!s) return;
 
     const key = `attendance_${num}`;
     const newState = !(s[key] === true || s[key] === 'true');
-    
     s[key] = newState;
 
-    // Visual Instant
-    btn.style.transition = 'none'; 
-    if (newState) {
-        btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
-        btn.textContent = '/';
-    } else {
-        btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
-        btn.textContent = 'O';
+    // Tunjuk warna loading dulu
+    setBtnStatus(btn, newState ? 'loading-tick' : 'loading-untick');
+
+    try {
+        await syncToSheet('update', s);
+        // Lepas siap baru tukar warna akhir
+        if (newState) {
+            btn.className = "w-7 h-7 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
+            btn.textContent = "/";
+        } else {
+            btn.className = "w-7 h-7 rounded-full border-2 bg-white border-slate-300 text-transparent flex items-center justify-center font-bold";
+            btn.textContent = "O";
+        }
+        updateRowTotalVisual(s);
+    } catch (e) {
+        alert("Gagal simpan! Sila cuba lagi.");
     }
-
-    // UPDATE JUMLAH DI SKRIN (Cari elemen jumlah dan tukar angkanya terus)
-    updateRowTotalVisual(s);
-
-    syncToSheet('update', s, btn);
 }
 
 // 2. FUNGSI TICK SEMUA
@@ -603,24 +615,31 @@ async function tickAllForMeeting(num) {
 // 3. FUNGSI UNTICK SEMUA
 async function untickAllForMeeting(num) {
     if(!selectedYear) return;
-    if(!confirm(`KOSONGKAN semua kehadiran untuk Perjumpaan P${num}?`)) return;
+    if(!confirm(`PADAM semua kehadiran P${num}?`)) return;
 
-    // Visual Instant (Tukar butang jadi putih/O)
-    const allButtons = document.querySelectorAll(`button[onclick*=", ${num}, this"]`);
-    allButtons.forEach(btn => {
-        btn.className = "w-7 h-7 rounded border-2 border-slate-200 text-slate-300 font-black text-[9px]";
-        btn.textContent = 'O';
-    });
-
+    toggleLoader(true);
+    const key = `attendance_${num}`;
     const targets = studentsData.filter(s => s.year == selectedYear);
     
-    // Guna 'for...of' supaya dia simpan ke Google Sheet satu-satu tanpa 'crash'
-    for (const s of targets) {
-        s[`attendance_${num}`] = false; 
-        updateRowTotalVisual(s); // Kemaskini angka Jum di skrin
-        await syncToSheet('update', s);
-    }
-    showAutoSaveNotification('Reset', `Kehadiran P${num} telah dikosongkan.`);
+    // 1. Tukar semua visual jadi kuning (Loading)
+    const allButtons = document.querySelectorAll(`button[onclick*=", ${num}, this"]`);
+    allButtons.forEach(btn => setBtnStatus(btn, 'loading-untick'));
+
+    // 2. Kemaskini data dalam memory
+    targets.forEach(s => {
+        s[key] = false;
+        updateRowTotalVisual(s);
+    });
+
+    // 3. Hantar satu arahan 'bulk_update' ke Google Script (Cikgu perlu update Script GS juga nanti)
+    await syncToSheet('bulk_update', { year: selectedYear, meeting_num: num, status: false });
+    
+    // 4. Tukar visual jadi putih (Selesai)
+    allButtons.forEach(btn => {
+        btn.className = "w-7 h-7 rounded-full border-2 bg-white border-slate-300 text-transparent flex items-center justify-center font-bold";
+        btn.textContent = "O";
+    });
+    toggleLoader(false);
 }
 // FUNGSI TAMBAHAN: Supaya angka Jumlah (Jum) pun laju berubah
 function updateRowTotalVisual(student) {
@@ -679,15 +698,11 @@ function updateRowTotalVisual(student) {
     async function saveUnitName(val) { await syncToSheet('update', { record_type: 'unit_config', unit_name: val.toUpperCase() }); showAutoSaveNotification('Sistem', 'Nama unit dikemaskini'); }
 
 async function saveMeetingDate(num, val) {
-    if (!val) return; 
-    
-    // val biasanya datang dari input date sebagai "YYYY-MM-DD"
-    // Kita simpan terus nilai string ini ke dalam rekod
-    meetingDatesRecord[`attendance_${num}`] = val; 
-    
+    // Walaupun val kosong (cikgu clear date), kita tetap hantar ke sheet
+    meetingDatesRecord[`attendance_${num}`] = val || ""; 
     await syncToSheet('update', meetingDatesRecord);
+    showAutoSaveNotification('Sistem', `Tarikh P${num} dikemaskini`);
 }
-
 function loadMeetingDatesUI() {
     for (let i = 1; i <= 12; i++) {
         const input = document.querySelector(`.date-input[data-date="${i}"]`);
