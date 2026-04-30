@@ -599,52 +599,60 @@ function toggleAttendanceManual(name, num, btn) {
         btn.textContent = "!";
     });
 }
-// 2. FUNGSI TICK SEMUA
+// 1. FUNGSI UNTUK BUTANG "/ SEMUA" (TICK SEMUA)
 async function tickAllForMeeting(num) {
-    if(!selectedYear) return;
-    if(!confirm(`Hadir semua murid P${num}?`)) return;
+    const confirmTick = confirm(`Tanda SEMUA murid hadir untuk Perjumpaan P${num}?`);
+    if (!confirmTick) return;
 
-    const allButtons = document.querySelectorAll(`button[onclick*=", ${num}, this"]`);
-    allButtons.forEach(btn => {
-        btn.style.transition = 'none';
-        btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
-        btn.textContent = '/';
-    });
+    const key = `attendance_${num}`;
+    // Tapis murid yang BELUM tick sahaja untuk jimat proses
+    const studentsToUpdate = studentsData.filter(s => s.year == selectedYear && (s[key] !== true && s[key] !== 'true'));
 
-    const targets = studentsData.filter(s => s.year == selectedYear);
-    targets.forEach(s => { 
-        s[`attendance_${num}`] = true; 
-        updateRowTotalVisual(s); // Kemas kini angka 'Jum' setiap murid
-    });
-
-    for (const s of targets) {
-        syncToSheet('update', s);
-        await new Promise(r => setTimeout(r, 50)); 
+    for (let s of studentsToUpdate) {
+        s[key] = true;
+        const btn = document.querySelector(`button[onclick*="'${s.name}'"][onclick*="${num}"]`);
+        
+        if (btn) {
+            // Visual Biru (Proses)
+            btn.className = "w-8 h-8 rounded-full border-2 bg-blue-500 border-blue-500 text-white flex items-center justify-center font-bold";
+            btn.textContent = "...";
+            
+            // Simpan ke Google Sheet
+            syncToSheet('update', s, btn).then(() => {
+                // Visual Hijau (Siap)
+                btn.className = "w-8 h-8 rounded-full border-2 bg-emerald-500 border-emerald-500 text-white flex items-center justify-center font-bold";
+                btn.textContent = "/";
+                updateRowTotalVisual(s);
+            });
+        }
     }
-    alert("Semua murid telah ditanda hadir!");
 }
 
-// 3. FUNGSI UNTICK SEMUA
+// 2. FUNGSI UNTUK BUTANG "RESET" (UNTICK SEMUA)
 async function untickAllForMeeting(num) {
-    if(!selectedYear) return;
-    if(!confirm(`Kosongkan semua kehadiran P${num}?`)) return;
+    const confirmReset = confirm(`PADAM semua kehadiran untuk Perjumpaan P${num}?`);
+    if (!confirmReset) return;
 
-    const allButtons = document.querySelectorAll(`button[onclick*=", ${num}, this"]`);
-    allButtons.forEach(btn => {
-        btn.style.transition = 'none';
-        btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
-        btn.textContent = 'O';
-    });
+    const key = `attendance_${num}`;
+    const studentsToUpdate = studentsData.filter(s => s.year == selectedYear && (s[key] === true || s[key] === 'true'));
 
-    const targets = studentsData.filter(s => s.year == selectedYear);
-    targets.forEach(s => { 
-        s[`attendance_${num}`] = false; 
-        updateRowTotalVisual(s); // Kemas kini angka 'Jum' setiap murid
-    });
-
-    for (const s of targets) {
-        syncToSheet('update', s);
-        await new Promise(r => setTimeout(r, 50)); 
+    for (let s of studentsToUpdate) {
+        s[key] = false;
+        const btn = document.querySelector(`button[onclick*="'${s.name}'"][onclick*="${num}"]`);
+        
+        if (btn) {
+            // Visual Kuning (Proses Padam)
+            btn.className = "w-8 h-8 rounded-full border-2 bg-yellow-400 border-yellow-400 text-white flex items-center justify-center font-bold";
+            btn.textContent = "...";
+            
+            // Simpan ke Google Sheet
+            syncToSheet('update', s, btn).then(() => {
+                // Visual Putih (Kosong/Reset)
+                btn.className = "w-8 h-8 rounded-full border-2 bg-white border-gray-300 text-transparent flex items-center justify-center font-bold";
+                btn.textContent = "O";
+                updateRowTotalVisual(s);
+            });
+        }
     }
 }
 
