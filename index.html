@@ -346,7 +346,7 @@
       
   <script>
     // --- KONFIGURASI SCRIPT URL ANDA ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_KWiQ1fxsCB3ooDl4zgsA0i7YUmhpo3nDLqP43xlrBeF6ZMFsafIdrwEDloay4pIt/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_EpFFxLfRW2jgCX9hP5NthJtYJjlAFwewo1rA4gPGYg2u34sQATpH7u8AWH2j8Q/exec";
     
     let config = { unit_name: '' };
     let studentsData = [];
@@ -418,23 +418,26 @@ console.log("Rekod Tarikh Ditemui:", meetingDatesRecord); // Untuk semakan di Co
         isInitialLoad = false; 
     }
 }
-    async function syncToSheet(action, data, elementRef = null) {
-        // Bina ID unik jika rekod murid
-        if(data.record_type === 'student') data.id = `${data.year}_${data.name}`;
+  async function syncToSheet(action, data, elementRef = null) {
+    if(data.record_type === 'student') data.id = `${data.year}_${data.name}`;
+    
+    if (elementRef) elementRef.classList.add('syncing');
+    try {
+        const response = await fetch(SCRIPT_URL, { 
+            method: 'POST', 
+            // Buang no-cors supaya kita boleh baca respon
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+            body: JSON.stringify({ action, data }) 
+        });
         
-        if (elementRef) elementRef.classList.add('syncing');
-        try {
-            await fetch(SCRIPT_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, data }) 
-            });
-            // Delay sedikit untuk pastikan Google Sheet sempat proses sebelum kita refresh UI
-            setTimeout(loadData, 600); 
-        } catch (e) { console.error("Error syncing:", e); } finally { if (elementRef) elementRef.classList.remove('syncing'); }
+        // Lepas setel simpan, baru kita refresh data kat skrin
+        await loadData(); 
+    } catch (e) { 
+        console.error("Error syncing:", e); 
+    } finally { 
+        if (elementRef) elementRef.classList.remove('syncing'); 
     }
-
+}
     function switchTab(tab) {
         document.querySelectorAll('.view-container').forEach(v => v.classList.add('hidden'));
         document.getElementById(`view-${tab}`).classList.remove('hidden');
@@ -615,31 +618,28 @@ async function tickAllForMeeting(num) {
 // 3. FUNGSI UNTICK SEMUA
 async function untickAllForMeeting(num) {
     if(!selectedYear) return;
-    if(!confirm(`PADAM semua kehadiran P${num}?`)) return;
+    if(!confirm(`KOSONGKAN semua kehadiran P${num}?`)) return;
 
-    toggleLoader(true);
+    toggleLoader(true); // Tunjuk loading besar
     const key = `attendance_${num}`;
     const targets = studentsData.filter(s => s.year == selectedYear);
     
-    // 1. Tukar semua visual jadi kuning (Loading)
+    // Tunjuk warna kuning (Proses) pada semua butang kolum tersebut
     const allButtons = document.querySelectorAll(`button[onclick*=", ${num}, this"]`);
-    allButtons.forEach(btn => setBtnStatus(btn, 'loading-untick'));
-
-    // 2. Kemaskini data dalam memory
-    targets.forEach(s => {
-        s[key] = false;
-        updateRowTotalVisual(s);
-    });
-
-    // 3. Hantar satu arahan 'bulk_update' ke Google Script (Cikgu perlu update Script GS juga nanti)
-    await syncToSheet('bulk_update', { year: selectedYear, meeting_num: num, status: false });
-    
-    // 4. Tukar visual jadi putih (Selesai)
     allButtons.forEach(btn => {
-        btn.className = "w-7 h-7 rounded-full border-2 bg-white border-slate-300 text-transparent flex items-center justify-center font-bold";
-        btn.textContent = "O";
+        btn.className = "w-7 h-7 rounded-full border-2 bg-yellow-400 border-yellow-400 text-white flex items-center justify-center font-bold animate-pulse";
+        btn.textContent = "...";
     });
+
+    // Hantar arahan 'bulk_update' ke Apps Script yang cikgu baru update tadi
+    await syncToSheet('bulk_update', { 
+        year: selectedYear, 
+        meeting_num: num, 
+        status: false 
+    });
+
     toggleLoader(false);
+    showAutoSaveNotification('Reset Selesai', `Kehadiran P${num} telah dikosongkan.`);
 }
 // FUNGSI TAMBAHAN: Supaya angka Jumlah (Jum) pun laju berubah
 function updateRowTotalVisual(student) {
