@@ -938,7 +938,7 @@ function updateRowTotalVisual(student) {
                 // 4. Kita tunggu sekejap (delay) untuk jadual siap dilukis, baru kita "kuningkan"
                 setTimeout(() => {
                     highlightStudentInTable(s.name);
-                }, 300); 
+                }, 800); 
             };
             content.appendChild(div);
         });
@@ -968,6 +968,7 @@ function highlightStudentInTable(studentName) {
                 row.style.transition = 'background-color 1s ease';
             }, 3000);
         } else {
+            row.style.outline = "2px solid #eab308"; // Tambah border kuning pekat sikit
             row.style.backgroundColor = ''; // Reset baris lain
         }
     });
