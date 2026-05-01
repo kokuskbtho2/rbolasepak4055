@@ -293,60 +293,91 @@
       </div>
 
 <div id="view-analytics" class="view-container hidden">
-        <div class="bg-white rounded-3xl p-8 border border-slate-100 text-left space-y-8">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div><h2 class="text-3xl font-black text-indigo-950 uppercase tracking-tighter">Analisa</h2><p class="text-slate-500 font-medium">Statistik Kehadiran Murid 2026</p></div>
-                <div class="flex gap-3">
-                    <select id="analytics-year-selector" onchange="updateAnalytics()" class="bg-blue-200 border-2 border-blue-200 rounded-xl px-4 py-2 font-bold outline-none"><option value="4">Tahun 4</option><option value="5">Tahun 5</option><option value="6">Tahun 6</option></select>
-                    <select id="meeting-selector" onchange="updateAnalytics()" class="bg-blue-200 border-2 border-blue-200 rounded-xl px-4 py-2 font-bold outline-none"><option value="all">Semua</option><script>for(let i=1;i<=12;i++){document.write(`<option value="${i}">P${i}</option>`)}</script></select>
+    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 text-left space-y-6">
+        
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+                <h2 class="text-3xl font-black text-indigo-950 uppercase tracking-tighter">Analisa</h2>
+                <p class="text-slate-500 font-medium">Statistik Kehadiran Murid 2026</p>
+            </div>
+            <div class="flex gap-3 w-full md:w-auto">
+                <select id="analytics-year-selector" onchange="updateAnalytics()" class="flex-1 md:flex-none bg-indigo-50 border-2 border-indigo-100 rounded-xl px-4 py-2 font-bold outline-none text-indigo-600">
+                    <option value="all">Semua Tahun</option>
+                    <option value="4">Tahun 4</option>
+                    <option value="5">Tahun 5</option>
+                    <option value="6">Tahun 6</option>
+                </select>
+                <select id="meeting-selector" onchange="updateAnalytics()" class="flex-1 md:flex-none bg-indigo-50 border-2 border-indigo-100 rounded-xl px-4 py-2 font-bold outline-none text-indigo-600">
+                    <option value="all">Semua P</option>
+                    <script>
+                        for(let i=1;i<=12;i++){
+                            document.write(`<option value="${i}">P${i}</option>`);
+                        }
+                    </script>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-6 bg-slate-50 rounded-2xl border-2 border-slate-100 relative overflow-hidden">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Analisa Pilihan</p>
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p id="total-present" class="text-4xl font-black text-indigo-600">0</p>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase">Bilangan Hadir</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="attendance-percentage" class="text-4xl font-black text-emerald-600">0%</p>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase">Peratus Hadir</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                <div class="p-6 bg-slate-50 rounded-2xl border-2 border-slate-100">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Tahun Yang Dipilih</p>
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <p id="total-present" class="text-3xl font-black text-indigo-600">0</p>
-                            <p class="text-[10px] font-bold text-slate-500 uppercase">Jumlah Hadir</p>
-                        </div>
-                        <div class="text-right">
-                            <p id="attendance-percentage" class="text-3xl font-black text-emerald-600">0%</p>
-                            <p class="text-[10px] font-bold text-slate-500 uppercase">Peratusan</p>
-                        </div>
+            <div class="p-6 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-200 relative overflow-hidden text-white">
+                <p class="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-3">Grand Total (Keseluruhan)</p>
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p id="grand-total-present" class="text-4xl font-black">0</p>
+                        <p class="text-[10px] font-bold text-indigo-200 uppercase">Total Hadir</p>
                     </div>
-                </div>
-
-                <div class="p-6 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-100">
-                    <p class="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-3 text-center">Grand Total (Tahun 4, 5 & 6)</p>
-                    <div class="flex justify-between items-end text-white">
-                        <div>
-                            <p id="grand-total-present" class="text-3xl font-black">0</p>
-                            <p class="text-[10px] font-bold text-indigo-200 uppercase">Total Hadir</p>
-                        </div>
-                        <div class="text-right">
-                            <p id="grand-total-percentage" class="text-3xl font-black">0%</p>
-                            <p class="text-[10px] font-bold text-indigo-200 uppercase">Peratusan Keseluruhan</p>
-                        </div>
+                    <div class="text-right">
+                        <p id="grand-total-percentage" class="text-4xl font-black text-yellow-300">0%</p>
+                        <p class="text-[10px] font-bold text-indigo-200 uppercase">Peratusan Unit</p>
                     </div>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-                <div class="flex flex-col items-center justify-center relative">
-                    <svg class="w-48 h-48 donut-chart" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" stroke-width="10" /><circle id="attendance-circle" cx="50" cy="50" r="40" fill="none" stroke="#4f46e5" stroke-width="10" stroke-dasharray="0 251.2" stroke-linecap="round" /></svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="attendance-percentage" class="text-3xl font-black text-indigo-950">0%</span><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hadir</span></div>
-                </div>
-                <div class="md:col-span-2 grid grid-cols-2 gap-4">
-                    <div class="p-6 bg-emerald-200 rounded-2xl"><p class="text-xs font-bold text-emerald-600 mb-1 uppercase">Hadir</p><p id="total-present" class="text-3xl font-black text-emerald-950">0</p></div>
-                    <div class="p-6 bg-rose-200 rounded-2xl"><p class="text-xs font-bold text-rose-600 mb-1 uppercase">Tidak Hadir</p><p id="total-absent" class="text-3xl font-black text-rose-950">0</p></div>
-                    <div class="p-6 bg-indigo-200 rounded-2xl"><p class="text-xs font-bold text-indigo-600 mb-1 uppercase">Jumlah Ahli</p><p id="total-students" class="text-3xl font-black text-indigo-950">0</p></div>
-                    <button onclick="generateAnalyticsPDFForYear(document.getElementById('analytics-year-selector').value)" class="p-6 bg-yellow-200 rounded-2xl font-black text-indigo-600 uppercase text-xs hover:bg-yellow-200 transition-all">Cetak Analisa</button>
                 </div>
             </div>
         </div>
-      </div>
-    </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+            <div class="flex flex-col items-center justify-center relative">
+                <svg class="w-48 h-48 -rotate-90" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="10" />
+                    <circle id="attendance-circle" cx="50" cy="50" r="40" fill="none" stroke="#4f46e5" stroke-width="10" 
+                        stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" class="transition-all duration-1000" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="chart-percent-label" class="text-3xl font-black text-indigo-950">0%</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kehadiran</span>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                <div class="p-5 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-rose-500 mb-1 uppercase tracking-tight">Tidak Hadir</p>
+                    <p id="total-absent" class="text-2xl font-black text-slate-900">0</p>
+                </div>
+                <div class="p-5 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-bold text-indigo-500 mb-1 uppercase tracking-tight">Jumlah Murid</p>
+                    <p id="total-students" class="text-2xl font-black text-slate-900">0</p>
+                </div>
+                <button onclick="generateAnalyticsPDF()" class="col-span-2 p-5 bg-yellow-400 hover:bg-yellow-500 rounded-2xl font-black text-indigo-950 uppercase text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-yellow-100">
+                    <i data-lucide="printer" class="w-5 h-5"></i>
+                    Cetak Laporan Analisa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     <div id="bulk-upload-student-list-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[9999] modal-backdrop p-4">
       <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl modal-content">
         <h3 class="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Tambah Pukal</h3>
@@ -699,38 +730,53 @@ function updateRowTotalVisual(student) {
 }
 
     // --- Search & Other Functions ---
-   function updateAnalytics() {
+ function updateAnalytics() {
     const y = document.getElementById('analytics-year-selector').value;
     const mv = document.getElementById('meeting-selector').value;
     
-    // --- 1. PENGIRAAN UNTUK TAHUN TERTENTU (Lama) ---
-    const students = studentsData.filter(s => s.year == y);
-    let present = 0, totalPossible = 0;
+    // 1. DATA UNTUK TAHUN TERTENTU (Kotak Utama & Donut Chart)
+    const students = (y === 'all') ? studentsData : studentsData.filter(s => s.year == y);
+    
+    let present = 0;
+    let totalPossible = 0;
+
     if (mv === 'all') { 
+        // Kira semua 12 perjumpaan untuk murid yang dipilih
         totalPossible = students.length * 12; 
-        students.forEach(s => { for(let i=1;i<=12;i++) if(s[`attendance_${i}`] === true || s[`attendance_${i}`] === 'true') present++; }); 
+        students.forEach(s => { 
+            for(let i=1; i<=12; i++) {
+                if(s[`attendance_${i}`] === true || s[`attendance_${i}`] === 'true') present++; 
+            }
+        }); 
     } else { 
+        // Kira hanya perjumpaan spesifik (P1 - P12)
         totalPossible = students.length; 
-        students.forEach(s => { if(s[`attendance_${mv}`] === true || s[`attendance_${mv}`] === 'true') present++; }); 
+        students.forEach(s => { 
+            if(s[`attendance_${mv}`] === true || s[`attendance_${mv}`] === 'true') present++; 
+        }); 
     }
     
-    const percentage = totalPossible > 0 ? Math.round((present/totalPossible)*100) : 0;
+    const percentage = totalPossible > 0 ? Math.round((present / totalPossible) * 100) : 0;
+
+    // Kemaskini Visual Paparan (Tahun Tertentu)
     document.getElementById('total-present').textContent = present;
     document.getElementById('total-absent').textContent = Math.max(0, totalPossible - present);
     document.getElementById('total-students').textContent = students.length;
     document.getElementById('attendance-percentage').textContent = percentage + '%';
     
-    // Update Circle Chart
+    // Kemaskini Donut Chart (SVG Circle)
     const circ = 251.2;
-    document.getElementById('attendance-circle').style.strokeDashoffset = circ - (percentage/100)*circ;
+    const circleElement = document.getElementById('attendance-circle');
+    if (circleElement) {
+        circleElement.style.strokeDashoffset = circ - (percentage / 100) * circ;
+    }
 
-    // --- 2. PENGIRAAN KESELURUHAN (TAHUN 4+5+6) - INFO BARU ---
+    // 2. DATA KESELURUHAN (Grand Total: Tahun 4 + 5 + 6)
+    // Walau apa pun Tahun yang dipilih di atas, kotak "Grand Total" tetap kira semua murid
     let grandPresent = 0;
     let grandTotalPossible = 0;
-    
-    // Kita ambil semua murid (4, 5, 6)
     const allStudents = studentsData.filter(s => [4,5,6].includes(Number(s.year)));
-    
+
     if (mv === 'all') {
         grandTotalPossible = allStudents.length * 12;
         allStudents.forEach(s => {
@@ -743,11 +789,13 @@ function updateRowTotalVisual(student) {
         });
     }
 
-    const grandPercentage = grandTotalPossible > 0 ? Math.round((grandPresent/grandTotalPossible)*100) : 0;
+    const grandPercentage = grandTotalPossible > 0 ? Math.round((grandPresent / grandTotalPossible) * 100) : 0;
     
-    // Masukkan nilai ke dalam kotak baru yang kita buat tadi
-    document.getElementById('grand-total-present').textContent = grandPresent;
-    document.getElementById('grand-total-percentage').textContent = grandPercentage + '%';
+    // Kemaskini Elemen Grand Total (Jika ada dalam HTML cikgu)
+    const gpElem = document.getElementById('grand-total-present');
+    const gpcElem = document.getElementById('grand-total-percentage');
+    if (gpElem) gpElem.textContent = grandPresent;
+    if (gpcElem) gpcElem.textContent = grandPercentage + '%';
 }
     function globalSearch() {
         const q = document.getElementById('global-search-input').value.trim().toUpperCase();
