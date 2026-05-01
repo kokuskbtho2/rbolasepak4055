@@ -418,24 +418,32 @@ console.log("Rekod Tarikh Ditemui:", meetingDatesRecord); // Untuk semakan di Co
         isInitialLoad = false; 
     }
 }
-  async function syncToSheet(action, data, elementRef = null) {
+ async function syncToSheet(action, data, elementRef = null) {
+    // Bina ID unik jika rekod murid
     if(data.record_type === 'student') data.id = `${data.year}_${data.name}`;
     
     if (elementRef) elementRef.classList.add('syncing');
+
     try {
-        const response = await fetch(SCRIPT_URL, { 
+        // Kita hantar data ke server tanpa tunggu jawapan untuk "refresh" skrin
+        // Ini akan buat web rasa sangat "instant"
+        fetch(SCRIPT_URL, { 
             method: 'POST', 
-            // Buang no-cors supaya kita boleh baca respon
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+            mode: 'no-cors', // Guna no-cors untuk kelajuan maksimum hantaran manual
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action, data }) 
         });
-        
-        // Lepas setel simpan, baru kita refresh data kat skrin
-        await loadData(); 
+
+        // NOTA: Kita BUANG loadData() di sini supaya skrin tak "glitch" 
+        // bila cikgu klik laju-laju. Data di skrin dah sedia betul (optimistic update).
+
     } catch (e) { 
         console.error("Error syncing:", e); 
     } finally { 
-        if (elementRef) elementRef.classList.remove('syncing'); 
+        if (elementRef) {
+            // Kita bagi delay sikit untuk kesan visual syncing hilang
+            setTimeout(() => elementRef.classList.remove('syncing'), 500);
+        }
     }
 }
     function switchTab(tab) {
