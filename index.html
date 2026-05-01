@@ -904,28 +904,73 @@ function updateRowTotalVisual(student) {
     if (gpElem) gpElem.textContent = grandPresent;
     if (gpcElem) gpcElem.textContent = grandPercentage + '%';
 }
-    function globalSearch() {
-        const q = document.getElementById('global-search-input').value.trim().toUpperCase();
-        const yearF = document.getElementById('global-search-year-filter').value;
-        const container = document.getElementById('global-search-results');
-        const content = document.getElementById('search-results-content');
-        const clearBtn = document.getElementById('global-search-clear');
-        if (!q) { container.classList.add('hidden'); clearBtn.classList.add('hidden'); return; }
-        clearBtn.classList.remove('hidden');
-        let filtered = studentsData.filter(s => s.name.includes(q));
-        if (yearF !== 'all') filtered = filtered.filter(s => s.year == yearF);
-        content.innerHTML = '';
-        if (filtered.length === 0) { content.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs uppercase font-black">Tiada hasil</div>'; }
-        else {
-            filtered.slice(0, 10).forEach(s => {
-                const div = document.createElement('div'); div.className = "p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0";
-                div.innerHTML = `<p class="font-black text-indigo-950 uppercase text-xs">${s.name}</p><p class="text-[9px] font-bold text-slate-400 uppercase">Tahun ${s.year} • ${s.class_name}</p>`;
-                div.onclick = () => { switchTab('attendance'); selectYear(s.year); clearGlobalSearch(); };
-                content.appendChild(div);
-            });
-        }
-        container.classList.remove('hidden');
+ function globalSearch() {
+    const q = document.getElementById('global-search-input').value.trim().toUpperCase();
+    const yearF = document.getElementById('global-search-year-filter').value;
+    const container = document.getElementById('global-search-results');
+    const content = document.getElementById('search-results-content');
+    const clearBtn = document.getElementById('global-search-clear');
+
+    if (!q) { container.classList.add('hidden'); clearBtn.classList.add('hidden'); return; }
+    
+    clearBtn.classList.remove('hidden');
+
+    let filtered = studentsData.filter(s => s.name.includes(q));
+    if (yearF !== 'all') filtered = filtered.filter(s => s.year == yearF);
+
+    content.innerHTML = '';
+
+    if (filtered.length === 0) {
+        content.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs uppercase font-black">Tiada hasil</div>';
+    } else {
+        filtered.slice(0, 10).forEach(s => {
+            const div = document.createElement('div');
+            div.className = "p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0";
+            div.innerHTML = `<p class="font-black text-indigo-950 uppercase text-xs">${s.name}</p>
+                             <p class="text-[9px] font-bold text-slate-400 uppercase">Tahun ${s.year} • ${s.class_name}</p>`;
+            
+            // MODIFIKASI DI SINI:
+            div.onclick = () => {
+                switchTab('attendance'); // 1. Pergi ke tab kehadiran
+                selectYear(s.year);      // 2. Pilih tahun murid tersebut (Tahun 4/5/6)
+                clearGlobalSearch();     // 3. Tutup kotak carian
+                
+                // 4. Kita tunggu sekejap (delay) untuk jadual siap dilukis, baru kita "kuningkan"
+                setTimeout(() => {
+                    highlightStudentInTable(s.name);
+                }, 300); 
+            };
+            content.appendChild(div);
+        });
     }
+    container.classList.remove('hidden');
+}
+
+// FUNGSI BARU UNTUK WARNA KUNING
+function highlightStudentInTable(studentName) {
+    const rows = document.querySelectorAll('#student-list-body tr');
+    let foundRow = null;
+
+    rows.forEach(row => {
+        const rowName = row.querySelector('td:nth-child(2)').textContent.trim().toUpperCase();
+        
+        if (rowName === studentName) {
+            row.style.backgroundColor = '#fef08a'; // Kuning (yellow-200)
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Auto-scroll ke baris tu!
+            foundRow = row;
+        } else {
+            row.style.backgroundColor = 'transparent'; // Reset baris lain
+        }
+    });
+
+    // Lepas 3 saat, kita hilangkan balik warna kuning tu (supaya tak kekal kuning selamanya)
+    if (foundRow) {
+        setTimeout(() => {
+            foundRow.style.backgroundColor = 'transparent';
+            foundRow.style.transition = 'background-color 1s ease';
+        }, 3000);
+    }
+}
 
     function clearGlobalSearch() { document.getElementById('global-search-input').value = ''; document.getElementById('global-search-results').classList.add('hidden'); document.getElementById('global-search-clear').classList.add('hidden'); }
 
