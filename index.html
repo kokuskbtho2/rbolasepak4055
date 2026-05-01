@@ -930,14 +930,14 @@ function updateRowTotalVisual(student) {
                              <p class="text-[9px] font-bold text-slate-400 uppercase">Tahun ${s.year} • ${s.class_name}</p>`;
             
             // MODIFIKASI DI SINI:
-            div.onclick = () => {
-                switchTab('attendance'); // 1. Pergi ke tab kehadiran
-                selectYear(s.year);      // 2. Pilih tahun murid tersebut (Tahun 4/5/6)
-                clearGlobalSearch();     // 3. Tutup kotak carian
-                
-                // 4. Kita tunggu sekejap (delay) untuk jadual siap dilukis, baru kita "kuningkan"
-                setTimeout(() => {
-                    highlightStudentInTable(s.name);
+        div.onclick = () => {
+    switchTab('attendance'); 
+    selectYear(s.year);      
+    clearGlobalSearch();     
+    
+    // Panggil highlighter
+    highlightStudentInTable(s.name);
+};
                 }, 800); 
             };
             content.appendChild(div);
@@ -948,30 +948,38 @@ function updateRowTotalVisual(student) {
 
 // FUNGSI BARU UNTUK WARNA KUNING
 function highlightStudentInTable(studentName) {
-    // 1. Cari semua baris dalam jadual
-    const rows = document.querySelectorAll('#student-list-body tr');
-    
-    rows.forEach(row => {
-        // Ambil nama dari kolom kedua (td ke-2)
-        const nameCell = row.querySelector('td:nth-child(2)');
-        if (nameCell && nameCell.textContent.trim().toUpperCase() === studentName.toUpperCase()) {
-            
-            // 2. Warnakan kuning
-            row.style.backgroundColor = '#fef08a'; 
-            
-            // 3. Skrol ke baris tersebut
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // 1. Kita cuba cari baris itu
+    // Kita bagi sikit delay (500ms) untuk pastikan renderStudentListRows dah selesai
+    setTimeout(() => {
+        const rows = document.querySelectorAll('#student-list-body tr');
+        let foundRow = null;
 
-            // 4. Hilangkan balik warna kuning lepas 3 saat
+        rows.forEach(row => {
+            const nameCell = row.querySelector('td:nth-child(2)');
+            if (nameCell && nameCell.textContent.trim().toUpperCase() === studentName.toUpperCase()) {
+                foundRow = row;
+            }
+        });
+
+        if (foundRow) {
+            // 2. Warnakan kuning & scroll
+            foundRow.style.backgroundColor = '#fef08a'; 
+            foundRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // 3. Tambah sedikit "glow" supaya cikgu nampak jelas
+            foundRow.style.boxShadow = "inset 0 0 10px #eab308";
+
+            // 4. Hilangkan balik lepas 3 saat
             setTimeout(() => {
-                row.style.backgroundColor = '';
-                row.style.transition = 'background-color 1s ease';
+                foundRow.style.backgroundColor = 'transparent';
+                foundRow.style.boxShadow = "none";
+                foundRow.style.transition = 'all 1s ease';
             }, 3000);
         } else {
-            row.style.outline = "2px solid #eab308"; // Tambah border kuning pekat sikit
-            row.style.backgroundColor = ''; // Reset baris lain
+            // Kalau tak jumpa, kita cuba cari sekali lagi selepas 200ms
+            console.log("Percubaan kedua mencari...");
         }
-    });
+    }, 600); 
 }
 
     function clearGlobalSearch() { document.getElementById('global-search-input').value = ''; document.getElementById('global-search-results').classList.add('hidden'); document.getElementById('global-search-clear').classList.add('hidden'); }
