@@ -327,8 +327,9 @@
                         <p class="text-[10px] font-bold text-slate-500 uppercase">Bilangan Hadir</p>
                     </div>
                     <div class="text-right">
-                        <p id="attendance-percentage" class="text-4xl font-black text-emerald-600">0%</p>
-                        <p class="text-[10px] font-bold text-slate-500 uppercase">Peratus Hadir</p>
+               <p id="attendance-percentage" class="text-3xl font-black text-emerald-600">0%</p>
+
+<p id="summary-percentage-display" class="text-3xl font-black text-emerald-600">0%</p>
                     </div>
                 </div>
             </div>
@@ -356,8 +357,9 @@
                         stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" class="transition-all duration-1000" />
                 </svg>
                 <div class="absolute inset-0 flex flex-col items-center justify-center">
-                    <span id="chart-percent-label" class="text-3xl font-black text-indigo-950">0%</span>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kehadiran</span>
+                <span id="attendance-percentage" class="text-3xl font-black text-indigo-950">0%</span>
+
+<span id="chart-percent-label" class="text-3xl font-black text-indigo-950">0%</span>
                 </div>
             </div>
 
@@ -758,17 +760,24 @@ function updateRowTotalVisual(student) {
     
     const percentage = totalPossible > 0 ? Math.round((present / totalPossible) * 100) : 0;
 
-    // Kemaskini Visual Paparan (Tahun Tertentu)
+ // === KEMASKINI PAPARAN SKRIN ===
+    // 1. Kotak Tahun Terpilih (Kiri)
     document.getElementById('total-present').textContent = present;
     document.getElementById('total-absent').textContent = Math.max(0, totalPossible - present);
     document.getElementById('total-students').textContent = students.length;
-    document.getElementById('attendance-percentage').textContent = percentage + '%';
     
-    // Kemaskini Donut Chart (SVG Circle)
+    // Guna ID BARU untuk peratus di kotak ringkasan kiri
+    document.getElementById('summary-percentage-display').textContent = percentage + '%'; 
+    
+    // 2. Donut Chart
+    // Guna ID BARU untuk peratus di tengah chart
+    document.getElementById('chart-percent-label').textContent = percentage + '%'; 
+
     const circ = 251.2;
+    const dashOffset = circ - (percentage / 100) * circ;
     const circleElement = document.getElementById('attendance-circle');
     if (circleElement) {
-        circleElement.style.strokeDashoffset = circ - (percentage / 100) * circ;
+        circleElement.style.strokeDashoffset = dashOffset;
     }
 
     // 2. DATA KESELURUHAN (Grand Total: Tahun 4 + 5 + 6)
