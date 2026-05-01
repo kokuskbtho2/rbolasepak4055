@@ -930,16 +930,36 @@ function updateRowTotalVisual(student) {
                              <p class="text-[9px] font-bold text-slate-400 uppercase">Tahun ${s.year} • ${s.class_name}</p>`;
             
             // MODIFIKASI DI SINI:
-            div.onclick = () => {
-                switchTab('attendance'); // 1. Pergi ke tab kehadiran
-                selectYear(s.year);      // 2. Pilih tahun murid tersebut (Tahun 4/5/6)
-                clearGlobalSearch();     // 3. Tutup kotak carian
-                
-                // 4. Kita tunggu sekejap (delay) untuk jadual siap dilukis, baru kita "kuningkan"
-                setTimeout(() => {
-                    highlightStudentInTable(s.name);
-                }, 300); 
-            };
+        div.onclick = () => {
+    // 1. Tukar Tab ke Kehadiran
+    switchTab('attendance'); 
+
+    // 2. Set Tahun Global (Penting!)
+    studentListYear = s.year; 
+
+    // 3. Kemaskini UI Butang Tahun (supaya nampak butang tahun tu 'active')
+    document.querySelectorAll('.year-btn').forEach(btn => {
+        if(btn.textContent.includes(s.year)) {
+            btn.classList.add('bg-indigo-600', 'text-white');
+            btn.classList.remove('bg-slate-100', 'text-slate-600');
+        } else {
+            btn.classList.remove('bg-indigo-600', 'text-white');
+            btn.classList.add('bg-slate-100', 'text-slate-600');
+        }
+    });
+
+    // 4. Lukis balik jadual untuk tahun tersebut
+    renderStudentListRows(); 
+    updateYearCounts();
+
+    // 5. Tutup kotak carian
+    clearGlobalSearch(); 
+
+    // 6. Baru kita highlight nama murid tu
+    setTimeout(() => {
+        highlightStudentInTable(s.name);
+    }, 500); // Kita beri masa 0.5 saat untuk jadual siap "render"
+};
             content.appendChild(div);
         });
     }
