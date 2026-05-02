@@ -633,7 +633,6 @@ async function processBulkUpload() {
     const lines = input.split('\n').filter(line => line.trim() !== "");
     const total = lines.length;
     
-    // UI Elements
     const progressContainer = document.getElementById('upload-progress-container');
     const progressBar = document.getElementById('upload-progress-bar');
     const progressPercent = document.getElementById('upload-progress-percent');
@@ -641,7 +640,6 @@ async function processBulkUpload() {
     const btnProses = document.getElementById('process-bulk-btn');
     const textArea = document.getElementById('bulk-student-list-names-input');
 
-    // 1. Persediaan Awal
     progressContainer.classList.remove('hidden');
     btnProses.disabled = true;
     btnProses.classList.add('opacity-50', 'cursor-not-allowed');
@@ -649,50 +647,57 @@ async function processBulkUpload() {
     
     let successCount = 0;
 
-    // 2. Loop Proses Upload
     for (let i = 0; i < total; i++) {
-        const [name, className] = lines[i].split('|').map(s => s.trim().toUpperCase());
+        const parts = lines[i].split('|');
+        const name = parts[0] ? parts[0].trim().toUpperCase() : null;
+        const className = parts[1] ? parts[1].trim().toUpperCase() : '-';
         
         if (name) {
             const newStudent = {
                 name: name,
-                class_name: className || '-',
-                year: studentListYear, // Guna tahun yang sedang aktif di tab
+                class_name: className,
+                year: studentListYear,
                 record_type: 'student'
             };
 
             try {
-                await syncToSheet('create', newStudent);
+                // TUNGGU RESPONS GOOGLE
+                const result = await syncToSheet('create', newStudent);
+                
+                // PENTING: Jika berjaya, terus masukkan ke dalam memori local
+                // Ini supaya kalau loadData() gagal pun, nama tetap ada kat skrin
+                studentsData.push(newStudent); 
+                
                 successCount++;
             } catch (e) {
-                console.error("Gagal simpan:", name);
+                console.error("Gagal simpan:", name, e);
             }
         }
 
-        // Kemaskini Progress
+        // Kemaskini Progress Bar secara real-time
         const percent = Math.round(((i + 1) / total) * 100);
         progressBar.style.width = percent + '%';
         progressPercent.textContent = percent + '%';
         countStatus.textContent = `MEMPROSES ${i + 1} / ${total} MURID`;
     }
 
-    // 3. Selesai
-    setTimeout(async () => {
-        alert(`Selesai! ${successCount} murid telah berjaya didaftarkan ke Tahun ${studentListYear}.`);
-        
-        // Reset UI
-        progressContainer.classList.add('hidden');
-        progressBar.style.width = '0%';
-        btnProses.disabled = false;
-        btnProses.classList.remove('opacity-50', 'cursor-not-allowed');
-        textArea.disabled = false;
-        textArea.value = '';
-        
-        closeBulkUploadStudentListModal();
-        await loadData(); // Refresh senarai murid di skrin
-    }, 500);
+    // Papar hasil sebenar
+    alert(`PROSES SELESAI!\n\nBerjaya: ${successCount} murid.\nGagal: ${total - successCount} murid.`);
+    
+    // Reset UI
+    progressContainer.classList.add('hidden');
+    progressBar.style.width = '0%';
+    btnProses.disabled = false;
+    btnProses.classList.remove('opacity-50', 'cursor-not-allowed');
+    textArea.disabled = false;
+    textArea.value = '';
+    
+    closeBulkUploadStudentListModal();
+    
+    // Refresh paparan jadual guna data baru yang kita push tadi
+    renderStudentListRows(); 
+    updateYearCounts();
 }
-
     // --- Attendance Logics ---
     function selectYear(y) {
         selectedYear = y;
